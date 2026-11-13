@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brotherhood Homestead Cost Calculator</title>
+<meta name="description" content="What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. Every number from a public source. Free, no login, no tracking.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Same range-country palette and type as the Brotherhood Land Finder. */
+  :root {
+    --bg: #f3f1ec; --surface: #ffffff; --fg: #1f2328; --muted: #5c6369; --rule: #d6d2c8;
+    --accent: #8a4b1f; --accent-ink: #ffffff; --accent-hover: #6e3a16;
+    --band: #22302e; --band-fg: #f3f1ec; --step: #2f5d4a; --warn: #9a3b1f;
+    --bar: #3d7a62; --grid: #e6e2d9; --field: #faf9f6;
+    --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --font-body: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15191b; --surface: #1d2224; --fg: #e8e5de; --muted: #a09c93; --rule: #343b3e;
+      --accent: #d98a4f; --accent-ink: #15191b; --accent-hover: #e9a068;
+      --band: #0f1514; --band-fg: #e8e5de; --step: #7fc3a4; --warn: #e58a6a;
+      --bar: #7fb49b; --grid: #2a3134; --field: #15191b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15191b; --surface: #1d2224; --fg: #e8e5de; --muted: #a09c93; --rule: #343b3e;
+    --accent: #d98a4f; --accent-ink: #15191b; --accent-hover: #e9a068;
+    --band: #0f1514; --band-fg: #e8e5de; --step: #7fc3a4; --warn: #e58a6a;
+    --bar: #7fb49b; --grid: #2a3134; --field: #15191b;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.5; overflow-x: hidden; }
+  .wrap { max-width: 1120px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px; }
+  header { background: var(--band); color: var(--band-fg); }
+  header .wrap { padding-block: 32px 28px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: flex-end; justify-content: space-between; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 8vw, 56px); line-height: .95; text-transform: uppercase; margin: 0 0 10px; text-wrap: balance; }
+  .lede { font-size: 19px; margin: 0; max-width: 640px; }
+  .lede a { color: inherit; }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase; margin: 0 0 6px; }
+  h3 { font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.05; text-transform: uppercase; margin: 0 0 6px; color: var(--step); }
+  .sub { color: var(--muted); margin: 0 0 14px; font-size: 15px; }
+  .card { background: var(--surface); border: 1px solid var(--rule); padding: 18px 20px; }
+  .card + .card { margin-top: 16px; }
+  a { color: var(--accent); }
+  .btn { display: inline-block; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 17px; text-decoration: none;
+    padding: 12px 16px; border-radius: 6px; min-height: 46px; line-height: 1.15; border: 2px solid transparent; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid var(--step); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--fg); border-color: var(--rule); }
+  .btn.ghost:hover { border-color: var(--fg); background: transparent; }
+  .theme { background: transparent; color: var(--band-fg); border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; min-height: 44px; }
+
+  .steps ol { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+  .steps li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; }
+  .steps .n { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1; color: var(--step); padding-top: 2px; }
+
+  /* layout */
+  .grid { display: grid; grid-template-columns: 400px 1fr; gap: 20px; align-items: start; margin-top: 20px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .results { position: sticky; top: 12px; }
+  @media (max-width: 900px) { .results { position: static; } }
+
+  /* form */
+  details.group { border-top: 1px solid var(--rule); }
+  details.group:first-of-type { border-top: 0; }
+  details.group summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; min-height: 48px; }
+  details.group summary::-webkit-details-marker { display: none; }
+  details.group summary h3 { margin: 0; }
+  details.group summary .tot { font-size: 15px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  details.group summary::after { content: "+"; font-family: var(--font-display); font-size: 26px; color: var(--muted); margin-left: 6px; line-height: 1; }
+  details.group[open] summary::after { content: "\2013"; }
+  .fields { display: grid; gap: 12px; padding: 0 0 16px; }
+  .field { display: grid; gap: 4px; }
+  .field label, .check label { font-size: 15px; font-weight: 500; }
+  .field .hint { font-size: 13.5px; color: var(--muted); line-height: 1.35; }
+  .field input[type=number], .field input[type=text], .field select {
+    width: 100%; font: inherit; font-size: 17px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--field); color: var(--fg); min-height: 46px; }
+  .field input[type=number] { font-variant-numeric: tabular-nums; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+  @media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+  .check { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+  .check input { width: 22px; height: 22px; accent-color: var(--step); margin: 0; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+  @media (max-width: 420px) { .checks { grid-template-columns: 1fr; } }
+  .unit { color: var(--muted); font-weight: 400; }
+
+  /* results */
+  .heroes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px) { .heroes { grid-template-columns: 1fr; } }
+  .hero { background: var(--surface); border: 1px solid var(--rule); padding: 16px 18px; }
+  .hero .lbl { font-size: 15px; color: var(--muted); margin: 0; }
+  .hero .val { font-size: clamp(34px, 7vw, 46px); font-weight: 600; line-height: 1.05; margin: 2px 0 2px; letter-spacing: -.01em; }
+  .hero .rng { font-size: 15px; color: var(--muted); margin: 0; }
+  .where { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+  .where b { color: var(--fg); font-weight: 600; }
+
+  .chart { margin-top: 4px; }
+  .chart svg { width: 100%; height: auto; display: block; font-family: var(--font-body); }
+  .chart .grid line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+  .chart .axis text, .chart .lab text { fill: var(--muted); font-size: 12.5px; }
+  .chart .cat text { fill: var(--fg); font-size: 14px; }
+  .chart .val text { fill: var(--fg); font-size: 13.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .chart .bar { fill: var(--bar); }
+  .chart .hit { fill: transparent; cursor: default; }
+  .chart .hit:hover + .bar, .chart .hit:focus + .bar { opacity: .85; }
+  .tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 13.5px; line-height: 1.35; padding: 8px 10px; border-radius: 6px; max-width: 240px; z-index: 5; }
+  .tip b { font-weight: 600; }
+  .chartwrap { position: relative; }
+  .toggle { font: inherit; font-size: 14px; color: var(--accent); background: none; border: 0; padding: 6px 0; cursor: pointer; text-decoration: underline; min-height: 40px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); font-size: 13.5px; text-transform: uppercase; letter-spacing: .02em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td .note { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.35; }
+  td .src { display: block; color: var(--muted); font-size: 13px; }
+  td .src a { color: var(--muted); }
+  tr.total td { font-weight: 600; border-top: 2px solid var(--fg); border-bottom: 0; }
+  tr.sect td { font-family: var(--font-display); text-transform: uppercase; font-size: 18px; color: var(--step); padding-top: 18px; border-bottom: 0; }
+  .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  @media (max-width: 560px) {
+    .tablewrap table { min-width: 0; }
+    .tablewrap th.lh, .tablewrap td.lh { display: none; }
+  }
+  .est { display: inline-block; font-size: 12px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; line-height: 1.5; vertical-align: middle; margin-left: 4px; }
+
+  .walk p { margin: 6px 0; }
+  .walk .big { font-size: 28px; font-weight: 600; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .flash { font-size: 14px; color: var(--step); min-height: 20px; margin: 6px 0 0; }
+  pre.summary { white-space: pre-wrap; font: 14px/1.45 ui-monospace, Consolas, monospace; background: var(--field); border: 1px solid var(--rule); padding: 12px; margin: 10px 0 0; max-height: 320px; overflow: auto; }
+
+  .sources ol { padding-left: 20px; font-size: 14.5px; }
+  .sources li { margin: 6px 0; }
+  .sources li a { word-break: break-all; }
+  footer { color: var(--muted); font-size: 14.5px; }
+  footer .wrap { padding-block: 24px 40px; }
+
+  /* phone sticky total */
+  .stick { position: fixed; left: 0; right: 0; bottom: 0; background: var(--band); color: var(--band-fg); padding: 10px max(16px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-bottom, 0px));
+    display: none; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; z-index: 10; border-top: 1px solid rgba(255,255,255,.15); }
+  .stick b { font-size: 19px; font-weight: 600; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stick a { color: inherit; font-weight: 600; white-space: nowrap; }
+  @media (max-width: 900px) { .stick { display: flex; } body { padding-bottom: 72px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Brotherhood Homestead Cost Calculator</h1>
+      <p class="lede">What it takes to leave town and set up a place in the country, and what it costs to keep it going each year. Every number traces to a public source. Change anything to fit your plan.</p>
+    </div>
+    <button class="theme" id="themeBtn" type="button" aria-pressed="false">Dark mode</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card steps" aria-label="How to use this">
+    <ol>
+      <li><span class="n">1</span><div><b>Pick a county.</b> The <a href="https://wcwilkins2025.github.io/brotherhood-land-finder/" rel="noopener">Land Finder</a> ranks every US county for a self-sustaining life. Pick one there or choose below.</div></li>
+      <li><span class="n">2</span><div><b>Set the place up on paper.</b> Acres, house, well, fence, animals. Defaults are already filled in from public cost tables. Change what you know.</div></li>
+      <li><span class="n">3</span><div><b>Copy the summary.</b> Paste it in a post, show your wife, or hand it to your banker. Then go get real quotes.</div></li>
+    </ol>
+  </section>
+
+  <div class="grid">
+    <form class="card controls" id="form" autocomplete="off" onsubmit="return false">
+      <details class="group" open>
+        <summary><h3>The land</h3><span class="tot" data-tot="Land and closing"></span></summary>
+        <div class="fields">
+          <div class="two">
+            <div class="field"><label for="state">State</label><select id="state"></select></div>
+            <div class="field"><label for="county">County</label><select id="county"><option value="">Any county</option></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="acres">Acres</label><input id="acres" type="number" min="1" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="price_per_acre">Price per acre <span class="unit">$</span></label><input id="price_per_acre" type="number" min="0" step="100" inputmode="numeric"><span class="hint" id="priceHint"></span></div>
+          </div>
+          <div class="field"><label for="tax_rate">Property tax rate <span class="unit">% of value per year</span></label><input id="tax_rate" type="number" min="0" step="0.01" inputmode="decimal"><span class="hint" id="taxHint"></span></div>
+          <div class="check"><input id="ag_exempt" type="checkbox"><label for="ag_exempt">Land qualifies for an ag valuation (lower tax on the land)</label></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>The house</h3><span class="tot" data-tot="House"></span></summary>
+        <div class="fields">
+          <div class="field"><label for="house">What you will live in</label>
+            <select id="house">
+              <option value="mobile_used">Used mobile home, moved in</option>
+              <option value="mobile_new">New manufactured home</option>
+              <option value="barndo">Barndominium</option>
+              <option value="build">Build a house</option>
+              <option value="existing">House already on the land</option>
+            </select></div>
+          <div class="field" id="sqftField"><label for="house_sqft">Size <span class="unit">sq ft</span></label><input id="house_sqft" type="number" min="200" step="50" inputmode="numeric"></div>
+          <div class="field" id="existingField" hidden><label for="existing_house_price">What the house adds to the price <span class="unit">$</span></label><input id="existing_house_price" type="number" min="0" step="1000" inputmode="numeric"><span class="hint">Asking price less what bare land would bring.</span></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Water, sewer, power</h3><span class="tot" data-tot="Water, sewer, power"></span></summary>
+        <div class="fields">
+          <div class="two">
+            <div class="field"><label for="well">Water</label><select id="well"><option value="well">Drill a well</option><option value="none">Already there or rural water</option></select></div>
+            <div class="field" id="wellDepthField"><label for="well_depth">Well depth <span class="unit">ft</span></label><input id="well_depth" type="number" min="0" step="10" inputmode="numeric"><span class="hint" id="wellHint"></span></div>
+          </div>
+          <div class="field"><label for="septic">Sewer</label><select id="septic"><option value="conventional">Conventional septic</option><option value="aerobic">Aerobic septic (tight soil)</option><option value="none">Already there</option></select></div>
+          <div class="two">
+            <div class="field"><label for="power">Power</label><select id="power"><option value="grid">Run power from the road</option><option value="solar">Off-grid solar</option><option value="none">Already there</option></select></div>
+            <div class="field" id="powerDistField"><label for="power_distance">Road to house <span class="unit">ft</span></label><input id="power_distance" type="number" min="0" step="50" inputmode="numeric"></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Fence and barn</h3><span class="tot" data-tot="Fence and barn"></span></summary>
+        <div class="fields">
+          <div class="two">
+            <div class="field"><label for="fence_type">Fence</label><select id="fence_type"><option value="barbed">5-strand barbed wire</option><option value="woven">Woven wire (goats, sheep)</option><option value="hightensile">High-tensile electric</option></select></div>
+            <div class="field"><label for="fence_shape">Shape of the place</label><select id="fence_shape"><option value="1">Square</option><option value="1.06">Twice as long as wide</option><option value="1.25">Long strip</option></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="pastures">Pastures to split it into</label><input id="pastures" type="number" min="1" max="8" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="fence_existing_pct">Fence already standing <span class="unit">%</span></label><input id="fence_existing_pct" type="number" min="0" max="100" step="5" inputmode="numeric"></div>
+          </div>
+          <span class="hint" id="fenceHint"></span>
+          <div class="field"><label for="barn_sqft">Barn or shop <span class="unit">sq ft, 0 for none</span></label><input id="barn_sqft" type="number" min="0" step="100" inputmode="numeric"><span class="hint">A 30 x 40 pole barn is 1,200 sq ft.</span></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Equipment</h3><span class="tot" data-tot="Equipment"></span></summary>
+        <div class="fields">
+          <div class="checks">
+            <div class="check"><input id="tractor" type="checkbox"><label for="tractor">Used tractor with loader</label></div>
+            <div class="check"><input id="trailer" type="checkbox"><label for="trailer">Stock trailer</label></div>
+            <div class="check"><input id="truck" type="checkbox"><label for="truck">Used 3/4-ton truck</label></div>
+            <div class="check"><input id="utv" type="checkbox"><label for="utv">Side-by-side</label></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Animals</h3><span class="tot" data-tot="Animals"></span></summary>
+        <div class="fields">
+          <div class="two">
+            <div class="field"><label for="cows">Cows <span class="unit">head</span></label><input id="cows" type="number" min="0" step="1" inputmode="numeric"><span class="hint" id="cowHint"></span></div>
+            <div class="field"><label for="horses">Horses</label><input id="horses" type="number" min="0" step="1" inputmode="numeric"></div>
+          </div>
+          <div class="check"><input id="bull" type="checkbox"><label for="bull">Buy a bull</label></div>
+          <div class="two">
+            <div class="field"><label for="goats">Goat does</label><input id="goats" type="number" min="0" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="hens">Laying hens</label><input id="hens" type="number" min="0" step="1" inputmode="numeric"></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Garden and orchard</h3><span class="tot" data-tot="Garden and orchard"></span></summary>
+        <div class="fields">
+          <div class="check"><input id="garden" type="checkbox"><label for="garden">Big garden, a quarter acre or so</label></div>
+          <div class="field"><label for="trees">Fruit trees <span class="unit">count</span></label><input id="trees" type="number" min="0" step="1" inputmode="numeric"></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h3>Walking away from town</h3><span class="tot" id="walkTot"></span></summary>
+        <div class="fields">
+          <div class="field"><label for="town_monthly">What you spend now, per month <span class="unit">$</span></label><input id="town_monthly" type="number" min="0" step="100" inputmode="numeric"><span class="hint" id="townHint"></span></div>
+          <div class="field"><label for="household_monthly">What you will spend out there, per month <span class="unit">$</span></label><input id="household_monthly" type="number" min="0" step="100" inputmode="numeric"><span class="hint">Groceries, fuel, phone, clothes. Not the place itself, that is counted below.</span></div>
+          <div class="field"><label for="health_monthly">Health insurance if you leave the job, per month <span class="unit">$</span></label><input id="health_monthly" type="number" min="0" step="50" inputmode="numeric"><span class="hint" id="healthHint"></span></div>
+          <div class="field"><label for="runway_months">Months of money to keep in hand</label><input id="runway_months" type="number" min="0" max="60" step="1" inputmode="numeric"><span class="hint">Months you could go with nothing coming in.</span></div>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button type="button" class="btn ghost" id="resetBtn">Reset to defaults</button>
+      </div>
+    </form>
+
+    <section class="results" aria-live="polite">
+      <p class="where" id="where"></p>
+      <div class="heroes">
+        <div class="hero">
+          <p class="lbl">To set it up, one time</p>
+          <p class="val" id="setupTyp">$0</p>
+          <p class="rng" id="setupRng"></p>
+        </div>
+        <div class="hero">
+          <p class="lbl">To keep it going, each year</p>
+          <p class="val" id="annualTyp">$0</p>
+          <p class="rng" id="annualRng"></p>
+        </div>
+      </div>
+
+      <div class="card chart" style="margin-top:16px">
+        <h3>Where the setup money goes</h3>
+        <p class="sub">Typical figure for each part. Hover or tap a bar for the low and high.</p>
+        <div class="chartwrap" id="chartwrap"></div>
+        <button type="button" class="toggle" id="chartTableBtn" aria-expanded="false">Show as a table</button>
+        <div id="chartTable" hidden></div>
+      </div>
+
+      <div class="card walk">
+        <h3>Walking away from town</h3>
+        <div id="walk"></div>
+        <div class="actions">
+          <button type="button" class="btn" id="copyBtn">Copy summary for a post</button>
+          <button type="button" class="btn ghost" id="linkBtn">Copy link to these numbers</button>
+        </div>
+        <p class="flash" id="flash" aria-live="polite"></p>
+        <details><summary class="toggle">See the summary text</summary><pre class="summary" id="summaryText"></pre></details>
+      </div>
+
+      <div class="card">
+        <h3>Every line</h3>
+        <p class="sub">Low, typical and high for each item, and where the figure comes from. <span class="est">estimate</span> marks a figure with no published source behind it, with the basis explained.</p>
+        <div class="tablewrap" id="lines"></div>
+      </div>
+
+      <div class="card sources">
+        <h3>Sources</h3>
+        <p class="sub">Public tables and extension-service budgets. Dates are when each was published. The full list with notes is in <a href="sources.md">sources.md</a>.</p>
+        <ol id="sourceList"></ol>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <p>These are planning figures, not quotes. Prices change by county, by year and by who you know. Get three bids on anything over a few thousand dollars, and check with the county before you buy. Open source on <a href="https://github.com/wcwilkins2025/homestead-cost-calculator" rel="noopener">GitHub</a>. Companion to the <a href="https://wcwilkins2025.github.io/brotherhood-land-finder/" rel="noopener">Brotherhood Land Finder</a>.</p>
+</div></footer>
+
+<div class="stick" id="stick"><div>Set up <b id="stickSetup">$0</b></div><div>Each year <b id="stickAnnual">$0</b></div><a href="#where">See the numbers</a></div>
+
+<script src="data/bundle.js"></script>
+<script src="calc.js"></script>
+<script>
+(function () {
+  'use strict';
+  var D = window.HC;
+  var calc = window.HCcalc;
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = calc.fmt;
+  var money = function (n) { return '$' + fmt(n); };
+
+  /* Round for display: totals to the nearest hundred, lines to the nearest ten. */
+  function rh(n) { return Math.round(n / 100) * 100; }
+  function rt(n) { return Math.round(n / 10) * 10; }
+
+  var STATE_NAMES = D.land.state_names;
+  var DEFAULTS = {
+    state: 'TX', county: 'Fannin County', acres: 40, price_per_acre: null, tax_rate: null, ag_exempt: true,
+    house: 'mobile_used', house_sqft: 1400, existing_house_price: 0,
+    well: 'well', well_depth: null, septic: 'conventional', power: 'grid', power_distance: 300,
+    fence_type: 'barbed', fence_shape: '1', pastures: 2, fence_existing_pct: 0, barn_sqft: 1200,
+    tractor: true, trailer: true, truck: true, utv: false,
+    cows: 10, bull: true, horses: 0, goats: 0, hens: 12,
+    garden: true, trees: 10,
+    town_monthly: Math.round(D.costs.items.household_spending.typ / 12 / 10) * 10,
+    household_monthly: Math.round(D.costs.items.household_spending_rural.typ / 12 / 10) * 10,
+    health_monthly: Math.round(D.costs.items.health_family_monthly.typ / 10) * 10,
+    runway_months: 12
+  };
+  var IDS = Object.keys(DEFAULTS);
+  var CHECKS = ['ag_exempt', 'tractor', 'trailer', 'truck', 'utv', 'bull', 'garden'];
+
+  /* ---------- state and county lists ---------- */
+  function fillStates() {
+    var sel = $('state');
+    var codes = Object.keys(STATE_NAMES).sort(function (a, b) { return STATE_NAMES[a] < STATE_NAMES[b] ? -1 : 1; });
+    codes.forEach(function (c) { var o = document.createElement('option'); o.value = c; o.textContent = STATE_NAMES[c]; sel.appendChild(o); });
+  }
+  function fillCounties(st, keep) {
+    var sel = $('county');
+    while (sel.options.length > 1) sel.remove(1);
+    var rows = (D.counties.states[st] || []);
+    rows.forEach(function (r) { var o = document.createElement('option'); o.value = r[1]; o.textContent = r[1]; sel.appendChild(o); });
+    sel.value = keep && rows.some(function (r) { return r[1] === keep; }) ? keep : '';
+  }
+  function countyRow(st, name) {
+    var rows = D.counties.states[st] || [];
+    for (var i = 0; i < rows.length; i++) if (rows[i][1] === name) return rows[i];
+    return null;
+  }
+  function matchCounty(st, text) {
+    if (!text) return '';
+    var t = String(text).toLowerCase().replace(/\s+(county|parish|borough|census area|municipality|city and borough)$/, '').trim();
+    var rows = D.counties.states[st] || [];
+    for (var i = 0; i < rows.length; i++) {
+      var n = rows[i][1].toLowerCase();
+      if (n === t || n.replace(/\s+(county|parish|borough|census area|municipality|city and borough)$/, '') === t) return rows[i][1];
+    }
+    return '';
+  }
+
+  /* ---------- defaults that depend on the place ---------- */
+  function placeDefaults(st, county) {
+    var row = countyRow(st, county);
+    var land = D.land.states[st] || {};
+    var out = {};
+    if (row && row[2]) { out.price = Math.round(row[2] / 50) * 50; out.priceHint = 'USDA 2022 average value of farm land and buildings in ' + county + '. Listings often run higher.'; }
+    else if (land.farm_real_estate) { out.price = Math.round(land.farm_real_estate / 50) * 50; out.priceHint = 'USDA ' + D.land.year + ' average farm real estate value for ' + STATE_NAMES[st] + '. Listings often run higher.'; }
+    else { out.price = 5000; out.priceHint = 'No USDA figure for this state. Enter the asking price.'; }
+    var taxRow = D.tax.states[st];
+    if (row && row[4] != null) { out.tax = row[4]; out.taxHint = 'Census: what homeowners in ' + county + ' pay as a share of home value.'; }
+    else if (taxRow != null) { out.tax = taxRow; out.taxHint = 'Tax Foundation: effective rate on homes in ' + STATE_NAMES[st] + ' (' + D.tax.data_year + ' data).'; }
+    else { out.tax = 1.0; out.taxHint = 'No published rate found. 1% is a rough middle.'; }
+    var wd = D.costs.well_depth_by_state[st];
+    out.well = wd ? wd.typ : D.costs.well_depth_default.typ;
+    out.wellHint = wd ? wd.note : D.costs.well_depth_default.note;
+    if (row && row[3] && row[3] <= out.well * 1.5) out.wellHint += ' Wells on record in ' + county + ': median ' + fmt(row[3]) + ' ft.';
+    return out;
+  }
+
+  /* ---------- read and write the form ---------- */
+  function readForm() {
+    var inp = {};
+    IDS.forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      inp[id] = CHECKS.indexOf(id) >= 0 ? el.checked : el.value;
+    });
+    return inp;
+  }
+  function writeForm(vals) {
+    IDS.forEach(function (id) {
+      var el = $(id);
+      if (!el || vals[id] === undefined || vals[id] === null) return;
+      if (CHECKS.indexOf(id) >= 0) el.checked = !!vals[id]; else el.value = vals[id];
+    });
+  }
+  function applyPlace(force) {
+    var st = $('state').value, county = $('county').value;
+    var p = placeDefaults(st, county);
+    if (force || !$('price_per_acre').value) $('price_per_acre').value = p.price;
+    if (force || !$('tax_rate').value) $('tax_rate').value = p.tax;
+    if (force || !$('well_depth').value) $('well_depth').value = p.well;
+    $('priceHint').textContent = p.priceHint;
+    $('taxHint').textContent = p.taxHint;
+    $('wellHint').textContent = p.wellHint;
+  }
+  function showHide() {
+    var h = $('house').value;
+    $('sqftField').hidden = !(h === 'build' || h === 'barndo');
+    $('existingField').hidden = h !== 'existing';
+    $('wellDepthField').hidden = $('well').value === 'none';
+    $('powerDistField').hidden = $('power').value !== 'grid';
+  }
+
+  /* ---------- URL deep link ---------- */
+  function fromUrl() {
+    var q = new URLSearchParams(location.search);
+    var vals = {};
+    var has = false;
+    q.forEach(function (v, k) {
+      if (k === 'price') k = 'price_per_acre';
+      if (k === 'depth') k = 'well_depth';
+      if (IDS.indexOf(k) < 0) return;
+      has = true;
+      if (CHECKS.indexOf(k) >= 0) vals[k] = /^(1|true|yes|on)$/i.test(v);
+      else vals[k] = v;
+    });
+    if (vals.state) vals.state = String(vals.state).toUpperCase();
+    if (vals.state && !STATE_NAMES[vals.state]) delete vals.state;
+    return has ? vals : null;
+  }
+  function toUrl() {
+    var inp = readForm();
+    var q = new URLSearchParams();
+    var p = placeDefaults(inp.state, inp.county);
+    IDS.forEach(function (id) {
+      var v = inp[id], d = DEFAULTS[id];
+      if (id === 'price_per_acre') d = p.price;
+      if (id === 'tax_rate') d = p.tax;
+      if (id === 'well_depth') d = p.well;
+      if (CHECKS.indexOf(id) >= 0) { if (v !== d) q.set(id, v ? '1' : '0'); return; }
+      if (String(v) !== String(d)) q.set(id === 'price_per_acre' ? 'price' : id, v);
+    });
+    if (!q.has('state')) q.set('state', inp.state);
+    if (inp.county && !q.has('county')) q.set('county', inp.county.replace(/ County$/, ''));
+    return location.origin + location.pathname + '?' + q.toString();
+  }
+
+  /* ---------- render ---------- */
+  var lastResult = null;
+  function render() {
+    showHide();
+    var inp = readForm();
+    var r = calc.compute(inp, D);
+    lastResult = r;
+    var st = inp.state, county = inp.county;
+    var placeName = (county ? county + ', ' : '') + STATE_NAMES[st];
+    $('where').textContent = '';
+    var b = document.createElement('b'); b.textContent = inp.acres + ' acres in ' + placeName;
+    $('where').appendChild(b);
+    $('where').appendChild(document.createTextNode(', ' + houseLabel(inp.house) + ', ' + headCount(inp) + '.'));
+
+    $('setupTyp').textContent = money(rh(r.setupTotal.typ));
+    $('setupRng').textContent = 'Likely ' + money(rh(r.setupTotal.low)) + ' to ' + money(rh(r.setupTotal.high));
+    $('annualTyp').textContent = money(rh(r.netAnnual.typ));
+    $('annualRng').textContent = 'Likely ' + money(rh(r.netAnnual.low)) + ' to ' + money(rh(r.netAnnual.high)) + (r.incomeTotal.typ > 0 ? ', after ' + money(rh(r.incomeTotal.typ)) + ' the place brings in' : '');
+    $('stickSetup').textContent = money(rh(r.setupTotal.typ));
+    $('stickAnnual').textContent = money(rh(r.netAnnual.typ));
+
+    var groups = calc.groupSetup(r.setup);
+    document.querySelectorAll('[data-tot]').forEach(function (el) {
+      var g = groups.filter(function (x) { return x.label === el.getAttribute('data-tot'); })[0];
+      el.textContent = g ? money(rh(g.typ)) : '';
+    });
+    $('walkTot').textContent = money(rh(r.walk.cashNeeded.typ)) + ' in hand';
+    $('fenceHint').textContent = 'About ' + fmt(r.fence.perimeter) + ' ft around the outside and ' + fmt(r.fence.cross) + ' ft of cross fence.';
+    var cowAcres = D.costs.items.acres_per_cow;
+    $('cowHint').textContent = inp.acres > 0 ? 'Figure ' + cowAcres.low + ' to ' + cowAcres.high + ' acres per cow on decent pasture: about ' + Math.floor(inp.acres / cowAcres.typ) + ' cows on ' + inp.acres + ' acres.' : '';
+    $('townHint').textContent = 'Default is the BLS average for a US household.';
+    $('healthHint').textContent = 'Default is the full employer family premium, about what COBRA costs. One man on the marketplace runs about $' + calc.fmt(D.costs.items.health_family_monthly.low) + ' before any subsidy.';
+
+    drawChart(groups);
+    drawLines(r);
+    drawWalk(r, inp);
+    $('summaryText').textContent = summaryText(r, inp, placeName);
+  }
+  function houseLabel(h) {
+    return { mobile_used: 'used mobile home', mobile_new: 'new manufactured home', barndo: 'barndominium', build: 'house built new', existing: 'house already there' }[h] || h;
+  }
+  function headCount(inp) {
+    var parts = [];
+    if (+inp.cows) parts.push(inp.cows + ' cows');
+    if (+inp.horses) parts.push(inp.horses + ' horses');
+    if (+inp.goats) parts.push(inp.goats + ' goats');
+    if (+inp.hens) parts.push(inp.hens + ' hens');
+    return parts.length ? parts.join(', ') : 'no animals';
+  }
+
+  /* ---------- chart: one series, horizontal bars ---------- */
+  var tip = null;
+  function drawChart(groups) {
+    var wrap = $('chartwrap');
+    wrap.textContent = '';
+    if (!groups.length) return;
+    var W = Math.max(280, Math.floor(wrap.clientWidth || 640));
+    var narrow = W < 520;
+    var rowH = narrow ? 50 : 40, padL = narrow ? 4 : 150, padR = narrow ? 76 : 90, padT = narrow ? 4 : 8, padB = 28;
+    var H = padT + groups.length * rowH + padB;
+    var max = Math.max.apply(null, groups.map(function (g) { return g.typ; }));
+    var step = niceStep(max);
+    var top = Math.ceil(max / step) * step;
+    var x = function (v) { return padL + (W - padL - padR) * (v / top); };
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, role: 'img', 'aria-label': 'Setup cost by part, typical figures' });
+    var grid = el('g', { 'class': 'grid' });
+    var axis = el('g', { 'class': 'axis' });
+    for (var v = 0; v <= top; v += step) {
+      grid.appendChild(el('line', { x1: x(v), x2: x(v), y1: padT, y2: H - padB }));
+      var t = el('text', { x: x(v), y: H - padB + 16, 'text-anchor': 'middle' });
+      t.textContent = v >= 1000 ? '$' + (v / 1000) + 'K' : '$' + v;
+      axis.appendChild(t);
+    }
+    svg.appendChild(grid); svg.appendChild(axis);
+    groups.forEach(function (g, i) {
+      var barH = 22;
+      var y = padT + i * rowH + (narrow ? 22 : 8);
+      var cat = narrow ? el('text', { x: padL, y: padT + i * rowH + 15, 'text-anchor': 'start' })
+                       : el('text', { x: padL - 10, y: y + barH / 2 + 5, 'text-anchor': 'end' });
+      cat.textContent = g.label;
+      var gc = el('g', { 'class': 'cat' }); gc.appendChild(cat); svg.appendChild(gc);
+      var w = Math.max(0, x(g.typ) - x(0));
+      var hit = el('rect', { x: 0, y: padT + i * rowH, width: W, height: rowH, 'class': 'hit', tabindex: 0 });
+      hit.setAttribute('aria-label', g.label + ': typical ' + money(rh(g.typ)) + ', low ' + money(rh(g.low)) + ', high ' + money(rh(g.high)));
+      var bar = el('path', { d: roundedBar(x(0), y, w, barH, 4), 'class': 'bar' });
+      var val = el('g', { 'class': 'val' });
+      var vt = el('text', { x: x(0) + w + 8, y: y + barH / 2 + 5 }); vt.textContent = money(rh(g.typ)); val.appendChild(vt);
+      svg.appendChild(hit); svg.appendChild(bar); svg.appendChild(val);
+      var show = function (ev) { showTip(wrap, ev, g); };
+      hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show); hit.addEventListener('focus', show);
+      hit.addEventListener('pointerleave', hideTip); hit.addEventListener('blur', hideTip);
+    });
+    wrap.appendChild(svg);
+    /* table twin */
+    var tbl = document.createElement('table');
+    var thead = document.createElement('thead'); var tr = document.createElement('tr');
+    ['Part', 'Low', 'Typical', 'High'].forEach(function (h, i) { var th = document.createElement('th'); th.textContent = h; if (i) th.className = 'num'; tr.appendChild(th); });
+    thead.appendChild(tr); tbl.appendChild(thead);
+    var tb = document.createElement('tbody');
+    groups.forEach(function (g) { tb.appendChild(row([g.label, money(rh(g.low)), money(rh(g.typ)), money(rh(g.high))])); });
+    tbl.appendChild(tb);
+    $('chartTable').textContent = ''; $('chartTable').appendChild(tbl);
+  }
+  function roundedBar(x, y, w, h, r) {
+    if (w <= r) return 'M' + x + ' ' + y + 'h' + w + 'v' + h + 'h' + (-w) + 'z';
+    return 'M' + x + ' ' + y + 'h' + (w - r) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' ' + r + 'v' + (h - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 ' + (-r) + ' ' + r + 'h' + (-(w - r)) + 'z';
+  }
+  function niceStep(max) {
+    if (max <= 0) return 1000;
+    var raw = max / 4, p = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), n = raw / p;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
+  }
+  function showTip(wrap, ev, g) {
+    if (!tip) { tip = document.createElement('div'); tip.className = 'tip'; }
+    tip.textContent = '';
+    var b = document.createElement('b'); b.textContent = money(rh(g.typ)); tip.appendChild(b);
+    tip.appendChild(document.createTextNode(' ' + g.label));
+    tip.appendChild(document.createElement('br'));
+    tip.appendChild(document.createTextNode('Low ' + money(rh(g.low)) + ', high ' + money(rh(g.high))));
+    wrap.appendChild(tip);
+    var rect = wrap.getBoundingClientRect();
+    var px = ev.clientX ? ev.clientX - rect.left : rect.width / 2, py = ev.clientY ? ev.clientY - rect.top : 20;
+    tip.style.left = Math.min(px + 12, rect.width - tip.offsetWidth - 4) + 'px';
+    tip.style.top = (py - tip.offsetHeight - 12) + 'px';
+  }
+  function hideTip() { if (tip && tip.parentNode) tip.parentNode.removeChild(tip); }
+
+  /* ---------- line table ---------- */
+  function drawLines(r) {
+    var tbl = document.createElement('table');
+    var thead = document.createElement('thead'); var tr = document.createElement('tr');
+    [['Item', ''], ['Low', 'num lh'], ['Typical', 'num'], ['High', 'num lh']].forEach(function (h) { var th = document.createElement('th'); th.textContent = h[0]; th.className = h[1]; tr.appendChild(th); });
+    thead.appendChild(tr); tbl.appendChild(thead);
+    var tb = document.createElement('tbody');
+    function section(title) { var t = document.createElement('tr'); t.className = 'sect'; var td = document.createElement('td'); td.colSpan = 4; td.textContent = title; t.appendChild(td); tb.appendChild(t); }
+    function lines(list) { list.forEach(function (l) { tb.appendChild(lineRow(l)); }); }
+    function total(label, t) { var t2 = row([label, money(rh(t.low)), money(rh(t.typ)), money(rh(t.high))]); t2.className = 'total'; tb.appendChild(t2); }
+    section('One time, to set it up'); lines(r.setup); total('Setup total', r.setupTotal);
+    section('Every year, to keep it going'); lines(r.annual); total('Yearly total', r.annualTotal);
+    if (r.income.length) { section('What the place brings in each year'); lines(r.income); total('Brings in', r.incomeTotal); total('Yearly, after what it brings in', r.netAnnual); }
+    tbl.appendChild(tb);
+    $('lines').textContent = ''; $('lines').appendChild(tbl);
+    drawSources(r);
+  }
+  function lineRow(l) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.appendChild(document.createTextNode(l.label + (l.qty ? ' (' + l.qty + ')' : '')));
+    var s = D.costs.sources[l.source];
+    if (s && s.estimate) { var e = document.createElement('span'); e.className = 'est'; e.textContent = 'estimate'; td.appendChild(e); }
+    if (l.note) { var n = document.createElement('span'); n.className = 'note'; n.textContent = l.note; td.appendChild(n); }
+    var src = document.createElement('span'); src.className = 'src';
+    if (l.source === 'you') src.textContent = 'Your figure.';
+    else if (l.source === 'tax') src.textContent = 'Rate from ' + ($('taxHint').textContent.split(':')[0] || 'the tax field') + '. Base: land plus house and buildings.';
+    else if (s) { var a = document.createElement('a'); a.href = s.url; a.rel = 'noopener'; a.textContent = s.name + (s.date ? ', ' + s.date : ''); src.appendChild(a); if (s.basis) src.appendChild(document.createTextNode(' ' + s.basis)); }
+    td.appendChild(src);
+    tr.appendChild(td);
+    [['low', 'num lh'], ['typ', 'num'], ['high', 'num lh']].forEach(function (k) { var c = document.createElement('td'); c.className = k[1]; c.textContent = money(rt(l[k[0]])); tr.appendChild(c); });
+    return tr;
+  }
+  function row(cells) {
+    var tr = document.createElement('tr');
+    cells.forEach(function (c, i) { var td = document.createElement('td'); td.textContent = c; if (i) td.className = 'num' + (i !== 2 ? ' lh' : ''); tr.appendChild(td); });
+    return tr;
+  }
+  function drawSources(r) {
+    var used = {};
+    r.setup.concat(r.annual, r.income).forEach(function (l) { if (D.costs.sources[l.source]) used[l.source] = true; });
+    var ol = $('sourceList'); ol.textContent = '';
+    var ids = Object.keys(used).sort(function (a, b) { return D.costs.sources[a].name < D.costs.sources[b].name ? -1 : 1; });
+    ids.forEach(function (id) {
+      var s = D.costs.sources[id];
+      var li = document.createElement('li');
+      var a = document.createElement('a'); a.href = s.url; a.rel = 'noopener'; a.textContent = s.name; li.appendChild(a);
+      li.appendChild(document.createTextNode((s.date ? ' (' + s.date + ')' : '') + (s.estimate ? '. Estimate: ' + s.basis : s.basis ? '. ' + s.basis : '')));
+      ol.appendChild(li);
+    });
+    ['land', 'tax', 'counties'].forEach(function (k) {
+      var s = D[k].source_list || [];
+      s.forEach(function (src) { var li = document.createElement('li'); var a = document.createElement('a'); a.href = src.url; a.rel = 'noopener'; a.textContent = src.name; li.appendChild(a); li.appendChild(document.createTextNode(src.date ? ' (' + src.date + ')' : '')); ol.appendChild(li); });
+    });
+  }
+
+  /* ---------- walk away ---------- */
+  function drawWalk(r, inp) {
+    var w = r.walk, box = $('walk');
+    box.textContent = '';
+    function p(text, cls) { var e = document.createElement('p'); e.textContent = text; if (cls) e.className = cls; box.appendChild(e); return e; }
+    p('Cash to have in hand before you go:');
+    p(money(rh(w.cashNeeded.typ)), 'big');
+    p('That is the setup cost plus ' + w.runwayMonths + ' months of running the place with nothing coming in. Likely ' + money(rh(w.cashNeeded.low)) + ' to ' + money(rh(w.cashNeeded.high)) + '.');
+    if (w.townYear > 0) {
+      if (w.savingPerYear > 0 && w.paybackYears <= 40) {
+        p('Out there you would spend about ' + money(rh(w.savingPerYear)) + ' a year less than you do in town. At that rate the setup money comes back in about ' + yearsText(w.paybackYears) + '.');
+      } else if (w.savingPerYear > 0) {
+        p('Out there you would spend about ' + money(rh(w.savingPerYear)) + ' a year less than you do in town. That is too little to ever pay back the setup money in cash. The move has to be worth it for other reasons, or the place has to earn more.');
+      } else {
+        p('On these numbers the place costs about ' + money(rh(-w.savingPerYear)) + ' a year more than town, so it never pays for itself in cash. It has to be worth it for other reasons, or the place has to earn more.');
+      }
+    }
+    p('The place itself, with what the animals and garden bring in counted, runs about ' + money(rh(placeOnly(r))) + ' a year. Household spending and health insurance are on top of that.');
+  }
+  function placeOnly(r) {
+    var t = 0;
+    r.annual.forEach(function (l) { if (l.key !== 'household' && l.key !== 'health') t += l.typ; });
+    return t - r.incomeTotal.typ;
+  }
+  function yearsText(y) {
+    if (y == null) return 'never';
+    if (y < 1) return Math.round(y * 12) + ' months';
+    if (y > 60) return 'more than 60 years';
+    return (Math.round(y * 10) / 10) + ' years';
+  }
+
+  /* ---------- summary text ---------- */
+  function summaryText(r, inp, placeName) {
+    var L = [];
+    L.push('What it costs: ' + inp.acres + ' acres in ' + placeName);
+    L.push('');
+    L.push('To set it up: about ' + money(rh(r.setupTotal.typ)) + ' (likely ' + money(rh(r.setupTotal.low)) + ' to ' + money(rh(r.setupTotal.high)) + ')');
+    L.push('To keep it going: about ' + money(rh(r.netAnnual.typ)) + ' a year' + (r.incomeTotal.typ ? ', after ' + money(rh(r.incomeTotal.typ)) + ' the place brings in' : ''));
+    L.push('Cash to have in hand with ' + r.walk.runwayMonths + ' months of runway: ' + money(rh(r.walk.cashNeeded.typ)));
+    if (r.walk.townYear > 0) {
+      L.push(r.walk.savingPerYear > 0 && r.walk.paybackYears <= 40 ? 'Pays for itself against town living in about ' + yearsText(r.walk.paybackYears) : 'Does not pay for itself in cash on these numbers');
+    }
+    L.push('');
+    L.push('The plan: ' + houseLabel(inp.house) + (inp.well !== 'none' ? ', ' + inp.well_depth + ' ft well' : '') + (inp.septic !== 'none' ? ', ' + (inp.septic === 'aerobic' ? 'aerobic' : 'conventional') + ' septic' : '') + ', ' + (inp.power === 'solar' ? 'off-grid solar' : inp.power === 'grid' ? 'power run ' + inp.power_distance + ' ft from the road' : 'power already there') + ', ' + fenceName(inp.fence_type) + ' fence' + (+inp.barn_sqft ? ', ' + fmt(inp.barn_sqft) + ' sq ft barn' : '') + ', ' + headCount(inp) + '.');
+    L.push('');
+    L.push('Where the setup money goes:');
+    calc.groupSetup(r.setup).forEach(function (g) { L.push('  ' + pad(g.label, 28) + money(rh(g.typ))); });
+    L.push('');
+    L.push('Each year:');
+    r.annual.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); });
+    if (r.income.length) { L.push('Brings in:'); r.income.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); }); }
+    L.push('');
+    L.push('Planning figures from USDA, extension services and other public tables. Not quotes. Run your own numbers: ' + toUrl());
+    return L.join('\n');
+  }
+  function pad(s, n) { s = s + ' '; while (s.length < n) s += ' '; return s; }
+  function fenceName(t) { return t === 'woven' ? 'woven wire' : t === 'hightensile' ? 'high-tensile electric' : 'barbed wire'; }
+
+  /* ---------- clipboard ---------- */
+  function copyText(text, msg) {
+    var done = function () { $('flash').textContent = msg; setTimeout(function () { $('flash').textContent = ''; }, 3000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else { fallbackCopy(text); done(); }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta);
+  }
+
+  /* ---------- helpers ---------- */
+  function el(tag, attrs) { var e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+  /* ---------- theme ---------- */
+  function setTheme(t) {
+    if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+    try { if (t) localStorage.setItem('theme', t); else localStorage.removeItem('theme'); } catch (e) {}
+    var dark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    $('themeBtn').textContent = dark ? 'Light mode' : 'Dark mode';
+    $('themeBtn').setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+  $('themeBtn').addEventListener('click', function () {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setTheme(dark ? 'light' : 'dark');
+  });
+  var saved = null; try { saved = localStorage.getItem('theme'); } catch (e) {}
+  setTheme(saved);
+
+  /* ---------- wire up ---------- */
+  fillStates();
+  function applyDefaults(vals) {
+    var v = {};
+    for (var k in DEFAULTS) v[k] = DEFAULTS[k];
+    for (var k2 in vals) v[k2] = vals[k2];
+    $('state').value = v.state;
+    fillCounties(v.state, matchCounty(v.state, v.county) || '');
+    writeForm(v);
+    $('county').value = matchCounty(v.state, v.county) || '';
+    applyPlace(false);
+    render();
+  }
+  var urlVals = fromUrl();
+  applyDefaults(urlVals || {});
+  if (urlVals && Object.keys(urlVals).length) { document.querySelectorAll('details.group').forEach(function (d) { d.open = true; }); }
+
+  $('state').addEventListener('change', function () { fillCounties($('state').value, ''); applyPlace(true); render(); });
+  $('county').addEventListener('change', function () { applyPlace(true); render(); });
+  $('form').addEventListener('input', function (ev) { if (ev.target.id === 'state' || ev.target.id === 'county') return; render(); });
+  $('form').addEventListener('change', function (ev) { if (ev.target.id === 'state' || ev.target.id === 'county') return; render(); });
+  $('resetBtn').addEventListener('click', function () { applyDefaults({ state: $('state').value, county: $('county').value }); applyPlace(true); render(); });
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { if (lastResult) drawChart(calc.groupSetup(lastResult.setup)); }, 150);
+  });
+  $('chartTableBtn').addEventListener('click', function () {
+    var open = $('chartTable').hidden; $('chartTable').hidden = !open;
+    this.textContent = open ? 'Hide the table' : 'Show as a table'; this.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  $('copyBtn').addEventListener('click', function () { copyText($('summaryText').textContent, 'Summary copied. Paste it anywhere.'); });
+  $('linkBtn').addEventListener('click', function () { copyText(toUrl(), 'Link copied.'); });
+})();
+</script>
+</body>
+</html>

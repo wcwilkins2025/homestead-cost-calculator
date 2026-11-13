@@ -1,0 +1,387 @@
+{
+ "year": 2025,
+ "unit": "$ per acre",
+ "note": "Average value of farm real estate (land and buildings), cropland and pasture, and pasture cash rent, by state. Alaska and Hawaii are not covered by the land value survey. Values are what USDA surveys report, not asking prices; small tracts list higher.",
+ "source_list": [
+  {
+   "id": "usda_land_2025",
+   "name": "USDA NASS, Land Values 2025 Summary, farm real estate, cropland and pasture average value per acre by state (tables pp. 8-15)",
+   "date": "August 2025",
+   "url": "https://usda.library.cornell.edu/concern/publications/pl8sd6t4z",
+   "file": "https://esmis.nal.usda.gov/sites/default/release-files/pn89d6567/2n49w148w/1g05hb655/land0825.txt"
+  },
+  {
+   "id": "usda_rent_2025",
+   "name": "USDA NASS QuickStats, Cash Rents 2025: pastureland rent, $ per acre, by state",
+   "date": "August 29, 2025",
+   "url": "https://quickstats.nass.usda.gov/results/58B27A06-F574-315B-A854-9BF568F17652"
+  }
+ ],
+ "state_names": {
+  "AL": "Alabama",
+  "AK": "Alaska",
+  "AZ": "Arizona",
+  "AR": "Arkansas",
+  "CA": "California",
+  "CO": "Colorado",
+  "CT": "Connecticut",
+  "DE": "Delaware",
+  "DC": "District of Columbia",
+  "FL": "Florida",
+  "GA": "Georgia",
+  "HI": "Hawaii",
+  "ID": "Idaho",
+  "IL": "Illinois",
+  "IN": "Indiana",
+  "IA": "Iowa",
+  "KS": "Kansas",
+  "KY": "Kentucky",
+  "LA": "Louisiana",
+  "ME": "Maine",
+  "MD": "Maryland",
+  "MA": "Massachusetts",
+  "MI": "Michigan",
+  "MN": "Minnesota",
+  "MS": "Mississippi",
+  "MO": "Missouri",
+  "MT": "Montana",
+  "NE": "Nebraska",
+  "NV": "Nevada",
+  "NH": "New Hampshire",
+  "NJ": "New Jersey",
+  "NM": "New Mexico",
+  "NY": "New York",
+  "NC": "North Carolina",
+  "ND": "North Dakota",
+  "OH": "Ohio",
+  "OK": "Oklahoma",
+  "OR": "Oregon",
+  "PA": "Pennsylvania",
+  "RI": "Rhode Island",
+  "SC": "South Carolina",
+  "SD": "South Dakota",
+  "TN": "Tennessee",
+  "TX": "Texas",
+  "UT": "Utah",
+  "VT": "Vermont",
+  "VA": "Virginia",
+  "WA": "Washington",
+  "WV": "West Virginia",
+  "WI": "Wisconsin",
+  "WY": "Wyoming"
+ },
+ "us": {
+  "farm_real_estate": 4350,
+  "cropland": 5830,
+  "pasture": 1920,
+  "pasture_rent": 15.5
+ },
+ "states": {
+  "AL": {
+   "farm_real_estate": 4150,
+   "cropland": 4550,
+   "pasture": 3400,
+   "pasture_rent": 25.0
+  },
+  "AK": {
+   "farm_real_estate": null,
+   "cropland": null,
+   "pasture": null,
+   "pasture_rent": null
+  },
+  "AZ": {
+   "farm_real_estate": 4180,
+   "cropland": 8150,
+   "pasture": 950,
+   "pasture_rent": 1.9
+  },
+  "AR": {
+   "farm_real_estate": 4250,
+   "cropland": 3720,
+   "pasture": 3370,
+   "pasture_rent": 22.0
+  },
+  "CA": {
+   "farm_real_estate": 13700,
+   "cropland": 17940,
+   "pasture": 4080,
+   "pasture_rent": 16.0
+  },
+  "CO": {
+   "farm_real_estate": 2290,
+   "cropland": 2880,
+   "pasture": 1150,
+   "pasture_rent": 7.0
+  },
+  "CT": {
+   "farm_real_estate": 14400,
+   "cropland": 22700,
+   "pasture": 12700,
+   "pasture_rent": null
+  },
+  "DE": {
+   "farm_real_estate": 9550,
+   "cropland": 9300,
+   "pasture": 7650,
+   "pasture_rent": null
+  },
+  "DC": {
+   "farm_real_estate": null,
+   "cropland": null,
+   "pasture": null,
+   "pasture_rent": null
+  },
+  "FL": {
+   "farm_real_estate": 8700,
+   "cropland": 10550,
+   "pasture": 7400,
+   "pasture_rent": 20.0
+  },
+  "GA": {
+   "farm_real_estate": 4720,
+   "cropland": 4520,
+   "pasture": 4900,
+   "pasture_rent": 36.0
+  },
+  "HI": {
+   "farm_real_estate": null,
+   "cropland": null,
+   "pasture": null,
+   "pasture_rent": 12.0
+  },
+  "ID": {
+   "farm_real_estate": 4580,
+   "cropland": 6050,
+   "pasture": 2400,
+   "pasture_rent": 15.0
+  },
+  "IL": {
+   "farm_real_estate": 8930,
+   "cropland": 9850,
+   "pasture": 4200,
+   "pasture_rent": 49.0
+  },
+  "IN": {
+   "farm_real_estate": 8850,
+   "cropland": 8250,
+   "pasture": 2790,
+   "pasture_rent": 53.5
+  },
+  "IA": {
+   "farm_real_estate": 9790,
+   "cropland": 10300,
+   "pasture": 3650,
+   "pasture_rent": 65.0
+  },
+  "KS": {
+   "farm_real_estate": 3100,
+   "cropland": 3440,
+   "pasture": 2270,
+   "pasture_rent": 23.5
+  },
+  "KY": {
+   "farm_real_estate": 5480,
+   "cropland": 6450,
+   "pasture": 3900,
+   "pasture_rent": 35.0
+  },
+  "LA": {
+   "farm_real_estate": 3850,
+   "cropland": 3570,
+   "pasture": 3490,
+   "pasture_rent": 23.0
+  },
+  "ME": {
+   "farm_real_estate": 3350,
+   "cropland": 4600,
+   "pasture": 2600,
+   "pasture_rent": 33.0
+  },
+  "MD": {
+   "farm_real_estate": 9750,
+   "cropland": 8990,
+   "pasture": 8100,
+   "pasture_rent": 59.0
+  },
+  "MA": {
+   "farm_real_estate": 14900,
+   "cropland": 26000,
+   "pasture": 15100,
+   "pasture_rent": 32.0
+  },
+  "MI": {
+   "farm_real_estate": 6800,
+   "cropland": 6350,
+   "pasture": 3100,
+   "pasture_rent": 35.0
+  },
+  "MN": {
+   "farm_real_estate": 6790,
+   "cropland": 7000,
+   "pasture": 2300,
+   "pasture_rent": 34.5
+  },
+  "MS": {
+   "farm_real_estate": 3580,
+   "cropland": 3960,
+   "pasture": 3220,
+   "pasture_rent": 22.5
+  },
+  "MO": {
+   "farm_real_estate": 5000,
+   "cropland": 5150,
+   "pasture": 2750,
+   "pasture_rent": 38.5
+  },
+  "MT": {
+   "farm_real_estate": 1230,
+   "cropland": 1320,
+   "pasture": 920,
+   "pasture_rent": 8.3
+  },
+  "NE": {
+   "farm_real_estate": 4250,
+   "cropland": 6800,
+   "pasture": 1510,
+   "pasture_rent": 28.5
+  },
+  "NV": {
+   "farm_real_estate": 1200,
+   "cropland": 3030,
+   "pasture": 850,
+   "pasture_rent": 10.5
+  },
+  "NH": {
+   "farm_real_estate": 6500,
+   "cropland": 9900,
+   "pasture": 7850,
+   "pasture_rent": null
+  },
+  "NJ": {
+   "farm_real_estate": 16600,
+   "cropland": 16400,
+   "pasture": 15200,
+   "pasture_rent": 47.5
+  },
+  "NM": {
+   "farm_real_estate": 725,
+   "cropland": 2020,
+   "pasture": 630,
+   "pasture_rent": 4.1
+  },
+  "NY": {
+   "farm_real_estate": 4300,
+   "cropland": 4010,
+   "pasture": 1950,
+   "pasture_rent": 31.0
+  },
+  "NC": {
+   "farm_real_estate": 5470,
+   "cropland": 5360,
+   "pasture": 6050,
+   "pasture_rent": 31.0
+  },
+  "ND": {
+   "farm_real_estate": 2360,
+   "cropland": 2710,
+   "pasture": 1140,
+   "pasture_rent": 23.5
+  },
+  "OH": {
+   "farm_real_estate": 9350,
+   "cropland": 9750,
+   "pasture": 4150,
+   "pasture_rent": 31.0
+  },
+  "OK": {
+   "farm_real_estate": 2540,
+   "cropland": 2470,
+   "pasture": 2100,
+   "pasture_rent": 18.0
+  },
+  "OR": {
+   "farm_real_estate": 3780,
+   "cropland": 4440,
+   "pasture": 1080,
+   "pasture_rent": 11.0
+  },
+  "PA": {
+   "farm_real_estate": 8490,
+   "cropland": 9560,
+   "pasture": 4240,
+   "pasture_rent": 44.0
+  },
+  "RI": {
+   "farm_real_estate": 22500,
+   "cropland": 32900,
+   "pasture": 16900,
+   "pasture_rent": null
+  },
+  "SC": {
+   "farm_real_estate": 4740,
+   "cropland": 4000,
+   "pasture": 4300,
+   "pasture_rent": 20.5
+  },
+  "SD": {
+   "farm_real_estate": 2970,
+   "cropland": 4610,
+   "pasture": 1340,
+   "pasture_rent": 31.0
+  },
+  "TN": {
+   "farm_real_estate": 6150,
+   "cropland": 6050,
+   "pasture": 5600,
+   "pasture_rent": 26.0
+  },
+  "TX": {
+   "farm_real_estate": 2970,
+   "cropland": 2710,
+   "pasture": 2300,
+   "pasture_rent": 7.7
+  },
+  "UT": {
+   "farm_real_estate": 3500,
+   "cropland": 5790,
+   "pasture": 1900,
+   "pasture_rent": 5.5
+  },
+  "VT": {
+   "farm_real_estate": 4400,
+   "cropland": 4350,
+   "pasture": 2830,
+   "pasture_rent": 31.0
+  },
+  "VA": {
+   "farm_real_estate": 6100,
+   "cropland": 6170,
+   "pasture": 5300,
+   "pasture_rent": 28.0
+  },
+  "WA": {
+   "farm_real_estate": 3710,
+   "cropland": 3480,
+   "pasture": 960,
+   "pasture_rent": 8.6
+  },
+  "WV": {
+   "farm_real_estate": 3520,
+   "cropland": 4220,
+   "pasture": 2330,
+   "pasture_rent": 16.0
+  },
+  "WI": {
+   "farm_real_estate": 6420,
+   "cropland": 7250,
+   "pasture": 3300,
+   "pasture_rent": 45.0
+  },
+  "WY": {
+   "farm_real_estate": 1000,
+   "cropland": 2000,
+   "pasture": 755,
+   "pasture_rent": 7.5
+  }
+ }
+}
