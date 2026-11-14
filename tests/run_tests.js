@@ -144,6 +144,38 @@ check('tips: ag valuation saves rate x land x (1 - ag share) per year when the b
 const um = t3.find((t) => t.key === 'used_mobile');
 check('tips: used mobile instead of new saves the price difference', um && near(um.amount, (items.house_mobile_new.typ + items.mobile_setup.typ) - (items.house_mobile_used.typ + items.mobile_setup.typ), 2));
 
+/* Making it pay: cattle on leased grass */
+const pin = Object.assign({}, inp, { cow_deal: 'own', lease_acres: 0, lease_rate: D.land.states.TX.pasture_rent, graze_apc: items.lease_apc.typ, sell_how: 'barn', work_income: 0, rent_monthly: 1370 });
+const pr = calc.compute(pin, D);
+const pl = calc.plan(pin, D, pr);
+const grass = items.lease_apc.typ * D.land.states.TX.pasture_rent;
+check('plan: own cow on lease clears calf value - keep - grass', near(pl.perHead.own.net, items.calf_sale.typ - items.cow_annual.typ - grass, 1));
+check('plan: own cow capital = bred cow + a 25th of a bull', near(pl.perHead.own.capital, items.cow_bred.typ + items.bull.typ / 25, 1));
+check('plan: share cow income = operator share x calf share x calf value', near(pl.perHead.share.income, items.cow_share_operator.typ * items.calf_income_share.typ * items.calf_sale.typ, 1));
+check('plan: custom care = daily rate x 30.4 x season months', near(pl.perHead.custom.net, items.custom_care_day.typ * 30.4 * items.lease_months.typ, 1));
+check('plan: stocker net swaps the budget grazing for this lease', near(pl.perHead.stocker.net, items.stocker_net.typ + items.stocker_grazing_budget.typ - items.stocker_acres.typ * D.land.states.TX.pasture_rent, 1));
+check('plan: rent path needs = (household + health + rent) x 12', near(pl.paths.rent.needs, (pin.household_monthly + pin.health_monthly + pin.rent_monthly) * 12, 1));
+check('plan: own-place path needs = net yearly cost of the place', near(pl.paths.own.needs, pr.netAnnual.typ, 1));
+const so = pl.paths.rent.solve.own;
+const upk = calc.fenceFeet(so.acres, 1, 1).perimeter * items.fence_barbed_per_ft.typ * items.fence_upkeep_pct.typ;
+check('plan: head to cover the gap = ceil((gap + lease upkeep) / net per head)', so.head === Math.ceil((pl.paths.rent.gapBefore + upk) / pl.perHead.own.net));
+check('plan: acres = head x acres per cow', so.acres === Math.round(so.head * items.lease_apc.typ));
+check('plan: cash to start = cattle + handling + 12 months of needs', near(so.cashToStart, so.head * pl.perHead.own.capital + items.handling_setup.typ + pl.paths.rent.needs, 2));
+check('plan: hours a week = head x hours per cow / 52', near(so.hoursWeek, so.head * items.labor_hours_cow.typ / 52, 0.1));
+check('plan: herd growth = half the calf crop less culls', near(pl.growth, items.calf_crop.typ * 0.5 - items.cull_rate.typ, 0.001));
+check('plan: ramp from half to full = 2 + log(2)/log(1+growth)', near(calc.rampYears(40, 80, D), 2 + Math.log(2) / Math.log(1 + pl.growth), 0.01));
+const i = items.fsa_operating_rate.low / 100, n = items.fsa_operating_years.typ;
+check('plan: FSA microloan payment is a 7-year amortization at the beginning-farmer cap', near(pl.fsa.microPayment, 50000 * i / (1 - Math.pow(1 + i, -n)), 1));
+const pl2 = calc.plan(Object.assign({}, pin, { cow_deal: 'share', lease_acres: 160, work_income: 40000 }), D, pr);
+check('plan: 160 leased acres at 4 per cow carries 40 head', pl2.head === 40);
+check('plan: lease as entered clears head x net - fence upkeep', near(pl2.leaseNet, 40 * pl2.perHead.share.net - calc.fenceFeet(160, 1, 1).perimeter * items.fence_barbed_per_ft.typ * items.fence_upkeep_pct.typ, 1));
+check('plan: income kept from work lowers the gap', near(pl2.paths.rent.gapBefore, pl2.paths.rent.needs - 40000, 1));
+const pl3 = calc.plan(Object.assign({}, pin, { sell_how: 'direct' }), D, pr);
+const prem = items.calf_crop.typ * (items.beef_hanging_wt.typ * items.beef_hanging_price.typ - items.calf_weaned_value.typ - (items.finish_carry.typ + 0.7 * grass));
+check('plan: selling direct adds calf crop x (carcass value - weaned value - carrying cost)', near(pl3.perHead.own.direct, prem, 1));
+const pl4 = calc.plan(Object.assign({}, pin, { cow_deal: 'stocker', lease_rate: 60 }), D, pr);
+check('plan: a deal that loses money per head reports no head count', pl4.perHead.stocker.net < 0 && pl4.paths.rent.solve.stocker.head === null);
+
 console.log('\nWorked example, typical figures:');
 console.log('  Setup total      ' + money(r.setupTotal.typ) + '  (' + money(r.setupTotal.low) + ' to ' + money(r.setupTotal.high) + ')');
 for (const g of calc.groupSetup(r.setup)) console.log('    ' + g.label.padEnd(22) + money(g.typ).padStart(10));

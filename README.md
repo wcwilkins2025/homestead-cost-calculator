@@ -33,6 +33,19 @@ Every line shows its range and where the figure came from. A line marked **estim
 
 Fence length is computed from acres: perimeter = shape factor x 4 x square root of the area (1.0 square, 1.06 for twice as long as wide, 1.25 for a long strip), plus (pastures - 1) x square root of the area for cross fence.
 
+## Making it pay
+
+The place is where you live. The **Make it pay** group is how a man earns a living from cattle with as little money as possible. Four ways in, each figured per head on leased grass at your lease rate:
+
+| Way in | What you put in | What you clear | Source |
+|---|---|---|---|
+| Your own cows | a bred cow and a 25th of a bull | calf and cull value, less keeping the cow and the grass | USDA AMS cow prices, ERS cow-calf returns, Texas A&M budget, USDA NASS pasture rent |
+| Cows leased on shares | nothing but panels and a chute | about two thirds of the calf money, less keeping the cow and the grass | NCFMEC-06 and Iowa State cow-lease worksheets |
+| Caring for other men's pairs | nothing but panels and a chute | about $1 a head a day for the season; the owner pays the grass at cost | Nebraska livestock custom rates, Kansas Bluestem pasture report |
+| Stockers for a season | a light calf, back in the fall | the Texas A&M stocker budget return, with the budget's grazing swapped for your lease | Texas A&M 2025 stocker budgets |
+
+The page shows what the family needs each year two ways (buy the place above, or rent a house and lease the grass), what the lease you entered clears, and for each way in how many head on how many acres cover the gap, the cash to start (cattle, handling setup, and your months in hand), hours a week, and for owned cows the years to grow from half a herd keeping heifers. Selling finished beef by the half or quarter is figured against what the weaned calf would have brought (USDA AMS grass-fed report, Arkansas and Michigan State extension). FSA beginning-farmer loan limits and rates are shown with the yearly payment on a microloan. Extra inputs: `cow_deal` (own, share, custom, stocker), `lease_acres`, `lease_rate`, `graze_apc`, `sell_how` (barn, direct), `work_income`, `rent_monthly`.
+
 ## Deep link
 
 Any input can be set from the URL, so another page can send a man straight to his county with the numbers filled in:
@@ -48,6 +61,7 @@ https://wcwilkins2025.github.io/homestead-cost-calculator/?state=TX&county=Fanni
 | `acres` | acres |
 | `price` | price per acre in dollars (otherwise the USDA default for the county or state) |
 | `depth` | well depth in feet |
+| `lease_acres`, `lease_rate`, `graze_apc`, `cow_deal`, `sell_how`, `work_income`, `rent_monthly` | the Make it pay inputs (see above) |
 | any other input id | `house`, `house_sqft`, `well`, `septic`, `power`, `power_distance`, `fence_type`, `fence_shape`, `pastures`, `fence_existing_pct`, `barn_sqft`, `tractor`, `trailer`, `truck`, `utv`, `cows`, `bull`, `horses`, `goats`, `hens`, `garden`, `trees`, `tax_rate`, `ag_exempt`, `town_monthly`, `household_monthly`, `health_monthly`, `runway_months` (checkboxes take 1 or 0) |
 
 The **Copy link** button on the page produces this URL for the current inputs. Only `state` and `county` are required for a prefilled page; everything else falls back to the defaults.

@@ -351,5 +351,134 @@
     return out;
   }
 
-  root.HCcalc = { compute: compute, tips: tips, fenceFeet: fenceFeet, groupSetup: groupSetup, fmt: fmt, GROUPS: GROUPS };
+  /* ---------- Making it pay: cattle on leased grass ----------
+     Four ways in, least money first is decided by the numbers, not by us:
+       own      buy bred cows, run them on leased grass, sell calves (or finished beef)
+       share    a cow owner keeps his cows and takes a share of the calf money; you supply grass, hay, labor
+       custom   you care for other men's pairs for a daily fee; the owner pays the grass at cost
+       stocker  buy light calves in spring, sell them off grass in the fall
+     Every figure comes from data/costs.json. Typical figures only; this is a planning picture. */
+  var DEALS = ['own', 'share', 'custom', 'stocker'];
+  var DEAL_NAMES = { own: 'Your own cows', share: 'Cows leased on shares', custom: "Caring for other men's pairs", stocker: 'Stockers for a season' };
+
+  function growthRate(data) {
+    var C = data.costs.items;
+    return C.calf_crop.typ * 0.5 - C.cull_rate.typ;   /* heifer calves kept, less cows culled */
+  }
+  /* Years to grow a herd from n0 to n keeping every heifer: two years before the first kept heifer calves, then compound growth. */
+  function rampYears(n0, n, data) {
+    if (!(n0 > 0) || n <= n0) return 0;
+    return 2 + Math.log(n / n0) / Math.log(1 + growthRate(data));
+  }
+
+  /* Per-head economics for one deal at the man's lease rate and stocking rate. */
+  function dealPerHead(deal, inp, data) {
+    var C = data.costs.items;
+    function it(k) { if (!C[k]) throw new Error('missing cost item ' + k); return C[k]; }
+    var rate = Math.max(0, +inp.lease_rate || 0);
+    var apc = Math.max(0.5, +inp.graze_apc || it('lease_apc').typ);
+    var grass = apc * rate;
+    var out = { deal: deal, name: DEAL_NAMES[deal], acres: apc, capital: 0, income: 0, cost: 0, hours: it('labor_hours_cow').typ, direct: 0, note: '' };
+    if (deal === 'stocker') {
+      out.acres = it('stocker_acres').typ;
+      out.hours = it('stocker_hours').typ;
+      out.capital = it('stocker_in').typ;
+      /* the budget charged its own grazing; swap in this lease */
+      out.income = it('stocker_net').typ + it('stocker_grazing_budget').typ - out.acres * rate;
+      out.net = out.income;
+      out.turns = true;
+      out.note = 'Buy light calves in spring, sell them off grass in the fall. The money comes back each season and an FSA operating loan can carry it, but a $10 a cwt drop in the market wipes out the margin.';
+      return out;
+    }
+    if (deal === 'custom') {
+      out.income = it('custom_care_day').typ * 30.4 * it('lease_months').typ;
+      out.net = out.income;
+      out.note = 'You lease the grass and pass it through at cost. The owner pays mineral and vet. You are paid for checking, doctoring and moving them. Nothing to buy and no price risk, but it is a job, not a business.';
+      return out;
+    }
+    var keep = it('cow_annual').typ + grass;
+    var calf = it('calf_sale').typ;
+    if (deal === 'share') {
+      out.income = it('cow_share_operator').typ * it('calf_income_share').typ * calf;
+      out.cost = keep;
+      out.note = 'A rancher who is slowing down keeps his cows and takes about a third of the calf check. You supply grass, hay, labor and management and keep the rest. He keeps the cull cow money. It takes a man who trusts you. At the latest ERS year ($' + fmt(it('calf_sale').high) + ' a cow) your share clears about $' + fmt(it('cow_share_operator').typ * it('calf_income_share').typ * it('calf_sale').high - keep) + '.';
+    } else {
+      out.capital = it('cow_bred').typ + it('bull').typ / 25;
+      out.income = calf;
+      out.cost = keep;
+      out.note = 'A bred cow is about $' + fmt(it('cow_bred').typ) + ' right now, a record. Start with fewer, keep the heifers, and the herd grows about ' + Math.round(growthRate(data) * 100) + '% a year. The typical figure is the ERS 2024 calf value; at the latest year ($' + fmt(it('calf_sale').high) + ' a cow) a cow clears about $' + fmt(it('calf_sale').high - keep) + '.';
+    }
+    if (inp.sell_how === 'direct') {
+      /* finishing a calf on grass and selling by the half or quarter, against selling it weaned */
+      var premium = it('calf_crop').typ * (it('beef_hanging_wt').typ * it('beef_hanging_price').typ - it('calf_weaned_value').typ - (it('finish_carry').typ + 0.7 * grass));
+      if (deal === 'share') premium *= it('cow_share_operator').typ;
+      out.direct = Math.round(premium);
+      out.income += premium;
+    }
+    out.net = out.income - out.cost;
+    return out;
+  }
+
+  /* The whole picture: what the family needs, what the lease as entered clears, and what it would take. */
+  function plan(inp, data, r) {
+    var C = data.costs.items;
+    var acres = Math.max(0, +inp.lease_acres || 0);
+    var deal = DEALS.indexOf(inp.cow_deal) >= 0 ? inp.cow_deal : 'own';
+    var work = Math.max(0, +inp.work_income || 0);
+    var rent = Math.max(0, +inp.rent_monthly || 0) * 12;
+    var hh = Math.max(0, +inp.household_monthly || 0) * 12;
+    var hi = Math.max(0, +inp.health_monthly || 0) * 12;
+    var runwayMonths = Math.max(0, +inp.runway_months || 0);
+    var perHead = {};
+    DEALS.forEach(function (d) { perHead[d] = dealPerHead(d, inp, data); });
+
+    /* the tenant usually keeps up the fence and water on a lease: figure it as fence repair on the lease perimeter */
+    function upkeepFor(ac) { return ac > 0 ? fenceFeet(ac, 1, 1).perimeter * C.fence_barbed_per_ft.typ * C.fence_upkeep_pct.typ : 0; }
+    var ph = perHead[deal];
+    var head = acres > 0 ? Math.floor(acres / ph.acres) : 0;
+    var upkeep = upkeepFor(acres);
+    var leaseNet = head > 0 ? head * ph.net - upkeep : 0;
+    var leaseCapital = head > 0 ? head * ph.capital + C.handling_setup.typ : 0;
+    var hoursWeek = head * ph.hours / 52;
+
+    function pathCalc(key, needs, baseCapital) {
+      var gap = needs - work;
+      var after = gap - leaseNet;
+      var runway = runwayMonths * needs / 12;
+      var p = { key: key, needs: Math.round(needs), gapBefore: Math.round(gap), gapAfter: Math.round(after), covered: after <= 0, runway: Math.round(runway), solve: {} };
+      DEALS.forEach(function (d) {
+        var x = perHead[d];
+        var s = { deal: d, name: x.name, net: Math.round(x.net), capital: Math.round(x.capital), acresPer: x.acres, hoursPer: x.hours, direct: x.direct, turns: !!x.turns, note: x.note };
+        if (gap <= 0) {
+          s.head = 0; s.acres = 0; s.capitalTotal = 0; s.hoursWeek = 0; s.cashToStart = Math.round(baseCapital + runway);
+        } else if (x.net > 0) {
+          var n = Math.ceil(gap / x.net);
+          n = Math.ceil((gap + upkeepFor(n * x.acres)) / x.net);
+          s.head = n; s.acres = Math.round(n * x.acres);
+          s.capitalTotal = Math.round(n * x.capital + C.handling_setup.typ);
+          s.hoursWeek = Math.round(n * x.hours / 52 * 10) / 10;
+          s.cashToStart = Math.round(baseCapital + s.capitalTotal + runway);
+          if (d === 'own') { s.startHalf = Math.ceil(n / 2); s.rampYears = Math.round(rampYears(s.startHalf, n, data)); }
+        } else {
+          s.head = null;
+        }
+        p.solve[d] = s;
+      });
+      return p;
+    }
+    var paths = {
+      own: pathCalc('own', r.netAnnual.typ, r.setupTotal.typ),
+      rent: pathCalc('rent', hh + hi + rent, 0)
+    };
+
+    var fsaRate = C.fsa_operating_rate.low / 100, fsaYears = C.fsa_operating_years.typ;
+    function payment(P) { return P * fsaRate / (1 - Math.pow(1 + fsaRate, -fsaYears)); }
+    var fsa = { microMax: C.fsa_microloan_max.typ, operatingMax: C.fsa_operating_max.typ, ratePct: C.fsa_operating_rate.low, standardPct: C.fsa_operating_rate.typ, years: fsaYears,
+      microPayment: Math.round(payment(C.fsa_microloan_max.typ)), payment: payment };
+
+    return { deal: deal, dealName: DEAL_NAMES[deal], head: head, acres: acres, upkeep: Math.round(upkeep), leaseNet: Math.round(leaseNet), leaseCapital: Math.round(leaseCapital),
+      hoursWeek: Math.round(hoursWeek * 10) / 10, perHead: perHead, paths: paths, fsa: fsa, growth: growthRate(data), work: work, rent: rent, household: hh, health: hi };
+  }
+
+  root.HCcalc = { compute: compute, tips: tips, plan: plan, dealPerHead: dealPerHead, rampYears: rampYears, fenceFeet: fenceFeet, groupSetup: groupSetup, fmt: fmt, GROUPS: GROUPS, DEALS: DEALS, DEAL_NAMES: DEAL_NAMES };
 })(typeof window !== 'undefined' ? window : globalThis);

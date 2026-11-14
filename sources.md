@@ -76,6 +76,35 @@ The county table was built from the Brotherhood Land Finder's public county file
 | Eggs laid (`eggs_dozen_per_hen`) | 15 | 17.4 | 20 | dozen per hen per year | umd_layers_2026 |
 | Store value of a dozen eggs (`egg_dozen_value`) | 3.37 | 4 | 6 | $ per dozen | est_egg_value **estimate** |
 | Food from a big garden (`garden_food_value`) | 677 | 915 | 1,200 | $ per year | joe_garden_2014 |
+| Pasture cash rent (`lease_rate_us`) | 7.7 | 15.5 | 38.5 | $ per acre per year | nass_rent_2025 |
+| Grazing season (`lease_months`) | 5 | 9 | 12 | months | osu_cr216_2021 |
+| Acres per cow on leased grass (`lease_apc`) | 3 | 4 | 9.4 | acres | osu_cr216_2021 |
+| Labor per cow (`labor_hours_cow`) | 3.72 | 5.65 | 12 | hours per year | est_labor_small **estimate** |
+| Calves weaned per cow (`calf_crop`) | 0.8 | 0.85 | 0.9 | share | est_calf_crop **estimate** |
+| Cows culled each year (`cull_rate`) | 0.1 | 0.12 | 0.15 | share | tamu_cowcalf_2025 |
+| Share of a cow's yearly income that is calves, not culls (`calf_income_share`) | 0.8 | 0.87 | 0.9 | share | est_calf_crop **estimate** |
+| Operator share of calf money on leased cows (`cow_share_operator`) | 0.6 | 0.66 | 0.7 | share | est_share_high **estimate** |
+| Care for other men's pairs (`custom_care_day`) | 0.43 | 1 | 1.56 | $ per head per day | unl_custom_2025 |
+| Pasture rent per pair per month (`pair_rent_month`) | 56.45 | 67 | 82.1 | $ per pair per month | unl_realestate_2026 |
+| Stocker calf bought (`stocker_in`) | 1,440 | 1,500 | 1,550 | $ per head | tamu_stocker_2025 |
+| Stocker returns to management (`stocker_net`) | 11 | 60 | 108 | $ per head per season | tamu_stocker_2025 |
+| Grazing cost built into the stocker budget (`stocker_grazing_budget`) | 50 | 70 | 70 | $ per head per season | tamu_stocker_2025 |
+| Acres per stocker for the season (`stocker_acres`) | 4 | 5 | 6 | acres | tamu_stocker_2025 |
+| Labor per stocker (`stocker_hours`) | 0.5 | 1 | 2 | hours per season | tamu_stocker_2025 |
+| Panels, chute, tank, mineral feeders (`handling_setup`) | 3,000 | 6,000 | 10,000 | $ | est_handling **estimate** |
+| Beef sold by the half or quarter (`beef_hanging_price`) | 4.25 | 5.9 | 6.95 | $ per lb hanging weight | ams_grassfed_2026 |
+| Grass-finished carcass (`beef_hanging_wt`) | 500 | 560 | 650 | lb hanging | uaex_fsa3143_2021 |
+| Weaned steer calf at the sale barn (`calf_weaned_value`) | 1,549 | 2,706 | 2,900 | $ per head | est_calf_value_high **estimate** |
+| Carrying a calf a year to finish, not counting grass (`finish_carry`) | 200 | 255 | 345 | $ per head | est_finish_carry **estimate** |
+| Processing paid by the customer (`processing_hanging`) | 0.57 | 0.94 | 1.25 | $ per lb hanging | ams_grassfed_2026 |
+| FSA operating microloan limit (`fsa_microloan_max`) | 50,000 | 50,000 | 50,000 | $ | fsa_chart_2025 |
+| FSA direct operating loan limit (`fsa_operating_max`) | 400,000 | 400,000 | 400,000 | $ | fsa_chart_2025 |
+| FSA operating loan rate (`fsa_operating_rate`) | 5 | 5.62 | 5.62 | % per year | fsa_rates_2026 |
+| FSA operating loan term (`fsa_operating_years`) | 1 | 7 | 7 | years | fsa_chart_2025 |
+| Rent for a house in the country (`rent_monthly`) | 985 | 1,370 | 1,652 | $ per month | hud_fmr_2026 |
+| Grass hay (`hay_ton`) | 125 | 138 | 161 | $ per ton | nass_cropvalues_2026 |
+| Custom round baling (`custom_bale`) | 13.15 | 15.75 | 17.88 | $ per bale | isu_custom_2026 |
+| Custom pasture mowing or shredding (`custom_mow_acre`) | 4.6 | 27.05 | 105.55 | $ per acre | isu_custom_2026 |
 
 ## Source list
 
@@ -113,6 +142,29 @@ The county table was built from the Brotherhood Land Finder's public county file
 - **utv_2024**: DTN Progressive Farmer, Polaris 2025 Ranger line pricing, April 2024. https://www.dtnpf.com/agriculture/web/ag/equipment/article/2024/04/10/polaris-introduces-full-line-2025 Ranger 1000 from $13,999; Crew XP 1000 from $25,499.
 - **bls_ces_2025**: BLS, Consumer Expenditures 2025, October 29, 2026. https://www.bls.gov/news.release/cesan.nr0.htm Average household spent $81,905 in 2025: housing $27,790, transportation $13,492, food $10,633, healthcare $6,470. Spending out there is figured as the total less housing and healthcare, which the calculator counts on their own lines.
 - **kff_premiums_2025**: KFF, 2025 Employer Health Benefits Survey, and Marketplace Average Benchmark Premiums, October 2025. https://www.kff.org/health-costs/press-release/2025-employer-health-benefits-survey/ Employer family coverage averaged $26,993 a year, about $2,250 a month, which is roughly what COBRA costs when you leave. Marketplace benchmark plan for one 40-year-old: $625 a month in 2026, before any subsidy.
+- **nass_rent_2025**: USDA NASS Quick Stats, cash rent for pastureland by state, 2025, August 2025. https://quickstats.nass.usda.gov/ Pasture cash rent per acre, 2025: US $15.50, Texas $7.70, Oklahoma $18, Arkansas $22, Tennessee $26, Kentucky $35, Missouri $38.50. State averages lean on big native-range leases; improved pasture near town rents higher.
+- **isu_rent_2026**: Iowa State University Extension, Ag Decision Maker C2-10, Cash Rental Rates for Iowa 2026 Survey, May 2026. https://www.extension.iastate.edu/agdm/wholefarm/pdf/c2-10.pdf Pasture $27 per animal unit month. Improved pasture $102 an acre, poor pasture $63 an acre, statewide, 1,450 responses.
+- **unl_realestate_2026**: University of Nebraska, Nebraska Farm Real Estate Market Highlights 2025-2026, Table 11, June 2026. https://cap.unl.edu/realestate/ Pasture rent per cow-calf pair per month, 2026, by district: $56.45 to $82.10. Stocker calf $32 to $51 a month. The monthly rate is traditionally multiplied by a five-month season.
+- **osu_cr216_2021**: Oklahoma State University Extension CR-216, Oklahoma Pasture Rental Rates 2020-21, March 2021. https://extension.okstate.edu/fact-sheets/oklahoma-pasture-rental-rates-2020-21.html Native pasture $15.42 an acre, bermudagrass $20.22. Grazing season 9.1 months. 9.4 acres per cow on native range. Of 623 leases, the livestock owner paid for mineral in 98%, fence labor in 85%, fence materials in 73%, water in 75%.
+- **ncfmec03_2011**: North Central Farm Management Extension Committee, NCFMEC-03, Pasture Rental Arrangements for Your Farm, December 2011. https://www.agmanager.info/sites/default/files/NCFMEC-03.pdf Sample lease assigns fence repair, water, mineral, checking cattle, vet calls and fly control to landlord or tenant by checkbox. Yearling example $25 a month for a four-month season.
+- **ncfmec06_2013**: North Central Farm Management Extension Committee, NCFMEC-06, Beef Cow Rental Arrangements for Your Farm, February 2013. https://ag.purdue.edu/commercialag/home/wp-content/uploads/2013/02/201302_NCFMEC_BeefCowRentalalArrangementsForYourFarm.pdf Worked example: the operator who supplies grass, hay, labor and management contributes 65.9% of the cost and takes 65.9% of the calf money; the cow owner 34.1%. The owner keeps all cull cow sales. Labor 5.65 hours per cow per year. Leased bulls run $700 or more a season.
+- **isu_c2_33_2011**: Iowa State University Extension, Ag Decision Maker C2-33, Beef Cow Joint Agreements, September 2011. https://www.extension.iastate.edu/agdm/wholefarm/html/c2-36.html When the owner supplies the cows and the pasture, calf income splits 40% owner, 60% operator. A labor-only party earns 20% to 25% of the calf crop.
+- **unl_custom_2025**: University of Nebraska, Custom Service Rates Related to Livestock Production in Nebraska 2025, June 2025. https://cap.unl.edu/sites/unl.edu.ianr.agecon.center-for-ag-profitability/files/media/file/nebraska-custom-rates-livestock-2025_ada.pdf Care for cow-calf pairs on summer pasture, not counting pasture rent or feed: $1.00 per head per day. Wintering cows $1.56 a day, range $0.83 to $2.40.
+- **ksu_bluestem_2025**: Kansas State University and Kansas Department of Agriculture, Bluestem Pasture Release 2025, May 2025. https://www.agmanager.info/sites/default/files/pdf/BluestemReport_2025.pdf A 1,250 lb cow-calf pair for the full summer: $276.25 with care, $210.84 without, so care is worth about $65 a pair a season. 600 lb stocker $133.75 with care. 8.1 acres per pair.
+- **tamu_stocker_2025**: Texas A&M AgriLife Extension, 2025 stocker budgets, District 8 native pasture and District 11 Coastal Bend, March and April 2025. https://agecoext.tamu.edu/wp-content/uploads/2025/03/2025D8StockersNative.pdf District 8: buy a 400 lb calf at $360 a cwt ($1,440), sell at 750 lb and $255, grazing 5 acres at $14, labor $15.83, returns to management $107.63 a head. District 11: buy 500 lb at $310 ($1,550), 160 days grazing, returns $10.99 a head.
+- **ams_grassfed_2026**: USDA AMS, National Grass Fed Beef Report, 2026 Quarter 3, September 2026. https://www.ams.usda.gov/mnreports/lsmngfbeef.pdf Direct sales by hanging weight, processing not included: whole $4.00 to $7.90 (average $5.90), half average $5.76, quarter $6.23. Processing paid by the customer: $0.94 a pound hanging plus a $125 slaughter fee. 84 producers.
+- **msu_freezer_2026**: Michigan State University Extension, How to price freezer beef, April 2026. https://www.canr.msu.edu/news/how-to-price-freezer-beef Dressing percentage: beef-type cattle 62% to 64%, grass-fed steers 50% to 60%. Example 1,400 lb steer, 882 lb carcass, $3.80 a pound hanging, breakeven $3.73.
+- **uaex_fsa3143_2021**: University of Arkansas Extension FSA3143, Raising Calves for Slaughter, 2021. https://www.uaex.uada.edu/publications/pdf/FSA-3143.pdf Forage-finished calves are often slaughtered near 1,000 lb live. Growing a 500 lb calf to 1,000 lb on forage takes about 367 days at 1.5 lb a day. Dressing 58% to 66%.
+- **isu_b1_21_2026**: Iowa State University Extension, Ag Decision Maker B1-21, Livestock Enterprise Budgets for Iowa 2026, June 2026. https://www.extension.iastate.edu/agdm/livestock/pdf/b1-21.pdf A 550 lb steer calf valued at $4.92 a pound, $2,706. Finishing it to 1,350 lb takes nine months, 69 bushels of corn, total cost $3,581.
+- **sare_grassfed_2026**: SARE, Enterprise Budgets for Diversified Farms, Case Study 3, Bottom Line Profitability for Grassfed Steers, 2026. https://www.sare.org/publications/enterprise-budgets-for-diversified-farms/case-study-3/ Steers finished at about 24 months. Net return selling locker beef by the half: minus $358 a head; selling boxed cuts: plus $154 a head, with a $30,000 cold storage room.
+- **mu_g204_2026**: University of Missouri Extension G204, Evaluating Direct-to-Consumer Marketing Opportunities for Local Beef, January 2026. https://www.extension.missouri.edu/publications/g204 Processing into retail cuts $847 an animal. Half beef priced at $2.78 a pound live, quarter $2.93, live sale $2.38.
+- **nebguide_g2364_2024**: University of Nebraska NebGuide G2364, Development of a Direct Marketing Beef Program: Custom vs. Inspected, July 2024. https://extensionpubs.unl.edu/publication/g2364/2024/pdf/view/g2364-2024.pdf Custom-exempt beef must be sold as a live animal before slaughter and is marked not for sale; retail cuts need a USDA-inspected plant and freezers. Small processors book 6 to 24 months out.
+- **fsa_rates_2026**: USDA Farm Service Agency, Current FSA Loan Interest Rates, November 1, 2026. https://www.fsa.usda.gov/tools/informational/rates/current-fsa-loan-interest-rates Farm operating, direct and microloan: 5.625%. Farm ownership direct: 6.25%. Down payment loan: 2.25%.
+- **fsa_chart_2025**: USDA Farm Service Agency, Farm Loan Information Chart, October 2025. https://www.fsa.usda.gov/sites/default/files/2025-11/FSA_farm_loan_info_chart%20%282%29.pdf Direct operating loan up to $400,000, 1 to 7 years, for livestock and equipment. Operating microloan up to $50,000, rate capped at 5% for beginning and veteran farmers. Farm ownership up to $600,000 over 40 years. A beginning farmer is anyone under ten years in.
+- **isu_custom_2026**: Iowa State University Extension, Ag Decision Maker A3-10, 2026 Iowa Farm Custom Rate Survey, March 2026. https://www.extension.iastate.edu/agdm/crops/pdf/a3-10.pdf Large round bales $13.15 each without wrap, $15.75 with. Mowing $15.45 an acre, raking $9.90. Mowing pasture $27.05 an acre, chopping brush $105.55. Hauling cattle by semi $4.70 a loaded mile. Fence building labor $42.70 an hour.
+- **unl_custom_2026**: University of Nebraska, 2026 Nebraska Agricultural Custom Rates Report, June 2026. https://cap.unl.edu/sites/unl.edu.ianr.agecon.center-for-ag-profitability/files/media/file/2026-nebraska-custom-rates-report_ada.pdf Baling large round bales with net wrap $17.88 a bale. Building four-strand barbed wire fence, labor only, $1.60 a foot. Mowing pasture $4.60 an acre.
+- **nass_cropvalues_2026**: USDA NASS, Crop Values 2025 Summary, February 2026. https://esmis.nal.usda.gov/sites/default/release-files/795791/cpvl0226.pdf All other hay, 2025 marketing year, dollars a ton: US $138, Texas $136, Oklahoma $161, Missouri $125.
+- **hud_fmr_2026**: HUD, FY 2026 Fair Market Rents, Texas nonmetropolitan counties, October 2025. https://www.huduser.gov/portal/datasets/fmr.html Fannin County, TX: 2 bedroom $985, 3 bedroom $1,370, 4 bedroom $1,652 a month. Look up any county at huduser.gov.
 
 ### Estimates
 
@@ -134,6 +186,12 @@ The county table was built from the Brotherhood Land Finder's public county file
 - **est_egg_value**: Estimate: store value of a dozen eggs. Maryland Extension figures the cost to raise a dozen at $3.37. Store eggs ran $3 to $6 a dozen in 2025.
 - **est_surprises**: Estimate: cushion for surprises. 5% to 15% on top of everything. Rock in the trench, a bad culvert, a second load of gravel.
 - **est_ag_share**: Estimate: ag valuation share. Where land qualifies for agricultural use valuation, it is taxed on a fraction of market value, commonly a tenth to a quarter. Varies by state and county; ask the appraisal district.
+- **est_labor_small**: Estimate: hours per cow for a small herd. Texas A&M budgets 3.72 hours a cow a year on a 200-cow ranch; the NCFMEC cow-lease worksheet uses 5.65. A man with 20 cows and no help spends more per cow; the high figure allows for that.
+- **est_calf_crop**: Estimate: calf crop and share of cow income from calves. The Texas A&M 2025 budget sells 0.655 calves per cow after keeping replacement heifers and culls 12% of cows, which implies about 85 calves weaned per 100 cows. Cull cows are about 13% of a cow's yearly income in that budget.
+- **est_finish_carry**: Estimate: carrying a weaned calf a year to grass finish. No published budget for grass-finishing a calf on leased pasture. Half the keep-a-cow line covers hay, mineral and vet; grazing is added at the lease rate for 0.7 of a cow's acres.
+- **est_handling**: Estimate: handling setup on leased grass. Twenty 12 ft panels at about $140 each (Priefert economy panel, retail), a used or economy squeeze chute ($3,000 to $5,800 at farm stores), a stock tank and mineral feeders. No manufacturer price list is published.
+- **est_calf_value_high**: Estimate: top of the weaned calf range. Low is the Texas A&M January 2025 budget (525 lb steer at $295 a cwt, $1,549). Typical is Iowa State June 2026 (550 lb at $4.92, $2,706). High allows a bit over the 2026 price.
+- **est_share_high**: Estimate: top of the operator share. Published splits run 60% (owner also supplies grass) to 65.9% (operator supplies grass). An operator who also supplies the bull and hauls to market can argue for 70%.
 
 ## Well depth defaults
 

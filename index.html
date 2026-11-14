@@ -92,8 +92,8 @@
   .unit { color: var(--muted); font-weight: 400; }
 
   /* results */
-  .heroes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 520px) { .heroes { grid-template-columns: 1fr; } }
+  .heroes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .heroes { grid-template-columns: 1fr; } }
   .hero { background: var(--surface); border: 1px solid var(--rule); padding: 16px 18px; }
   .hero .lbl { font-size: 15px; color: var(--muted); margin: 0; }
   .hero .val { font-size: clamp(34px, 7vw, 46px); font-weight: 600; line-height: 1.05; margin: 2px 0 2px; letter-spacing: -.01em; }
@@ -131,6 +131,27 @@
   }
   .est { display: inline-block; font-size: 12px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; line-height: 1.5; vertical-align: middle; margin-left: 4px; }
 
+  .pay p { margin: 6px 0; }
+  .pay .h4 { font-family: var(--font-display); font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: .02em; margin: 18px 0 4px; color: var(--step); }
+  .pay .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0; }
+  @media (max-width: 600px) { .pay .two-col { grid-template-columns: 1fr; } }
+  .pay .col { border: 1px solid var(--rule); padding: 12px 14px; background: var(--field); }
+  .pay .col h5 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+  .pay .col .big { font-size: 24px; font-weight: 600; margin: 2px 0; }
+  .pay .ok { color: var(--step); font-weight: 600; }
+  .pay .short { color: var(--warn); font-weight: 600; }
+  .pay .line { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; margin: 2px 0; }
+  .pay .line span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pay ol { list-style: none; padding: 0; margin: 0; }
+  .pay li { display: grid; grid-template-columns: 118px 1fr; gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--rule); align-items: start; }
+  .pay li:first-child { border-top: 0; }
+  .pay li.pick { background: var(--field); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+  .pay .amt { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; }
+  .pay .per { display: block; font-family: var(--font-body); font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 3px; text-transform: none; }
+  .pay .ttl { font-weight: 600; margin: 0 0 3px; }
+  .pay .txt { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.4; }
+  .pay .use { margin-top: 6px; }
+  @media (max-width: 560px) { .pay li { grid-template-columns: 1fr; gap: 2px; } .pay .amt { font-size: 21px; } .pay .per { display: inline; margin-left: 6px; } }
   .walk p { margin: 6px 0; }
   .tips ol { list-style: none; padding: 0; margin: 0; }
   .tips li { display: grid; grid-template-columns: 118px 1fr; gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--rule); align-items: start; }
@@ -289,6 +310,36 @@
         </div>
       </details>
 
+      <details class="group" open>
+        <summary><h3>Make it pay</h3><span class="tot" id="payTot"></span></summary>
+        <div class="fields">
+          <p class="hint" style="margin:0">The place above is where you live. This is how a man earns a living from cattle with as little money as possible: leased grass, and cows he owns, leases on shares, cares for, or turns over in a season.</p>
+          <div class="field"><label for="cow_deal">The cattle deal</label>
+            <select id="cow_deal">
+              <option value="own">Buy my own cows</option>
+              <option value="share">Lease cows on shares (the owner takes a share of the calves)</option>
+              <option value="custom">Care for other men's pairs, paid by the head per day</option>
+              <option value="stocker">Stockers: buy light calves in spring, sell off grass in fall</option>
+            </select><span class="hint" id="dealHint"></span></div>
+          <div class="two">
+            <div class="field"><label for="lease_acres">Grass leased <span class="unit">acres</span></label><input id="lease_acres" type="number" min="0" step="10" inputmode="numeric"><span class="hint" id="leaseHint"></span></div>
+            <div class="field"><label for="lease_rate">Lease rate <span class="unit">$ per acre per year</span></label><input id="lease_rate" type="number" min="0" step="0.5" inputmode="decimal"><span class="hint" id="leaseRateHint"></span></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="graze_apc">Acres per cow on that grass</label><input id="graze_apc" type="number" min="1" step="0.5" inputmode="decimal"><span class="hint" id="apcHint"></span></div>
+            <div class="field" id="sellField"><label for="sell_how">How you sell</label>
+              <select id="sell_how">
+                <option value="barn">Calves at the sale barn</option>
+                <option value="direct">Finished beef by the half or quarter</option>
+              </select><span class="hint" id="sellHint"></span></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="work_income">Income you keep, per year <span class="unit">$</span></label><input id="work_income" type="number" min="0" step="1000" inputmode="numeric"><span class="hint">Remote work, a trade, a part-time job with benefits, a pension. After tax.</span></div>
+            <div class="field"><label for="rent_monthly">Rent if you do not buy, per month <span class="unit">$</span></label><input id="rent_monthly" type="number" min="0" step="50" inputmode="numeric"><span class="hint" id="rentHint"></span></div>
+          </div>
+        </div>
+      </details>
+
       <div class="actions">
         <button type="button" class="btn ghost" id="resetBtn">Reset to defaults</button>
       </div>
@@ -306,6 +357,11 @@
           <p class="lbl">To keep it going, each year</p>
           <p class="val" id="annualTyp">$0</p>
           <p class="rng" id="annualRng"></p>
+        </div>
+        <div class="hero">
+          <p class="lbl">To live off it, renting a house</p>
+          <p class="val" id="payTyp">&ndash;</p>
+          <p class="rng" id="payRng"></p>
         </div>
       </div>
 
@@ -326,6 +382,16 @@
         </div>
         <p class="flash" id="flash" aria-live="polite"></p>
         <details><summary class="toggle">See the summary text</summary><pre class="summary" id="summaryText"></pre></details>
+      </div>
+
+      <div class="card pay">
+        <h3>Living off it</h3>
+        <p class="sub" id="paySub"></p>
+        <div class="two-col" id="payPaths"></div>
+        <p class="h4">Ways in</p>
+        <p class="sub" id="ladderSub"></p>
+        <ol id="ladder"></ol>
+        <p class="sub" id="fsaNote" style="margin:12px 0 0"></p>
       </div>
 
       <div class="card tips">
@@ -382,7 +448,9 @@
     town_monthly: Math.round(D.costs.items.household_spending.typ / 12 / 10) * 10,
     household_monthly: Math.round(D.costs.items.household_spending_rural.typ / 12 / 10) * 10,
     health_monthly: Math.round(D.costs.items.health_family_monthly.typ / 10) * 10,
-    runway_months: 12
+    runway_months: 12,
+    cow_deal: 'own', lease_acres: 0, lease_rate: null, graze_apc: D.costs.items.lease_apc.typ, sell_how: 'barn', work_income: 0,
+    rent_monthly: Math.round(D.costs.items.rent_monthly.typ / 10) * 10
   };
   var IDS = Object.keys(DEFAULTS);
   var CHECKS = ['ag_exempt', 'tractor', 'trailer', 'truck', 'utv', 'bull', 'garden'];
@@ -432,6 +500,8 @@
     out.well = wd ? wd.typ : D.costs.well_depth_default.typ;
     out.wellHint = wd ? wd.note : D.costs.well_depth_default.note;
     if (row && row[3] && row[3] <= out.well * 1.5) out.wellHint += ' Wells on record in ' + county + ': median ' + fmt(row[3]) + ' ft.';
+    if (land.pasture_rent) { out.lease = land.pasture_rent; out.leaseHint = 'USDA 2025 average pasture cash rent in ' + STATE_NAMES[st] + '. A state average leans on big native-range leases; improved pasture near town rents for more (Iowa improved pasture is $102). Put in what the neighbors are getting.'; }
+    else { out.lease = D.costs.items.lease_rate_us.typ; out.leaseHint = 'USDA 2025 US average pasture cash rent. Put in what the neighbors are getting.'; }
     return out;
   }
 
@@ -458,6 +528,8 @@
     if (force || !$('price_per_acre').value) $('price_per_acre').value = p.price;
     if (force || !$('tax_rate').value) $('tax_rate').value = p.tax;
     if (force || !$('well_depth').value) $('well_depth').value = p.well;
+    if (force || !$('lease_rate').value) $('lease_rate').value = p.lease;
+    $('leaseRateHint').textContent = p.leaseHint;
     $('priceHint').textContent = p.priceHint;
     $('taxHint').textContent = p.taxHint;
     $('wellHint').textContent = p.wellHint;
@@ -468,6 +540,13 @@
     $('existingField').hidden = h !== 'existing';
     $('wellDepthField').hidden = $('well').value === 'none';
     $('powerDistField').hidden = $('power').value !== 'grid';
+    var deal = $('cow_deal').value;
+    $('sellField').hidden = !(deal === 'own' || deal === 'share');
+    $('dealHint').textContent = { own: 'You buy bred cows and sell their calves. Most money in, most kept.', share: 'A cow owner keeps his cows; you supply grass, hay, labor and management and keep about two thirds of the calf money (NCFMEC worksheet). Nothing to buy but panels and a chute.', custom: 'You are paid about $1 a head a day to look after other men\'s pairs (Nebraska survey). The owner pays the grass at cost, mineral and vet.', stocker: 'Buy 400 to 500 lb calves in spring, graze them to 750 lb, sell in the fall. Money back each season; thin margin, real price risk.' }[deal];
+    $('apcHint').textContent = 'Texas Parks and Wildlife figures 3 to 8 acres a cow on decent pasture; Oklahoma native range runs 9.4 (OSU). Ask the man who leases it.';
+    $('leaseHint').textContent = 'A quarter section is 160 acres. Leave at 0 and the page tells you how many you would need.';
+    $('sellHint').textContent = 'Direct beef runs $' + D.costs.items.beef_hanging_price.typ.toFixed(2) + ' a pound hanging (USDA, 2026) against a weaned calf worth about $' + fmt(D.costs.items.calf_weaned_value.typ) + ' today. It takes another year on grass and customers lined up.';
+    $('rentHint').textContent = 'HUD Fair Market Rent, 3 bedroom, Fannin County TX, 2026. Look up your county at huduser.gov.';
   }
 
   /* ---------- URL deep link ---------- */
@@ -496,6 +575,7 @@
       if (id === 'price_per_acre') d = p.price;
       if (id === 'tax_rate') d = p.tax;
       if (id === 'well_depth') d = p.well;
+      if (id === 'lease_rate') d = p.lease;
       if (CHECKS.indexOf(id) >= 0) { if (v !== d) q.set(id, v ? '1' : '0'); return; }
       if (String(v) !== String(d)) q.set(id === 'price_per_acre' ? 'price' : id, v);
     });
@@ -506,6 +586,7 @@
 
   /* ---------- render ---------- */
   var lastResult = null;
+  var lastPlan = null;
   function render() {
     showHide();
     var inp = readForm();
@@ -541,6 +622,13 @@
     drawLines(r);
     drawWalk(r, inp);
     drawTips(calc.tips(inp, D, r));
+    var pl = calc.plan(inp, D, r);
+    lastPlan = pl;
+    drawPay(pl, r, inp);
+    var ps = pl.paths.rent.solve[pl.deal];
+    if (pl.paths.rent.gapBefore <= 0) { $('payTyp').textContent = 'Covered'; $('payRng').textContent = 'What you keep from work covers rent, household and health insurance.'; }
+    else if (ps.head == null) { $('payTyp').textContent = 'Not this way'; $('payRng').textContent = pl.dealName + ' loses money per head at these rates.'; }
+    else { $('payTyp').textContent = ps.head + ' head'; $('payRng').textContent = pl.dealName + ' on about ' + fmt(ps.acres) + ' leased acres, ' + money(rh(ps.cashToStart)) + ' to start, ' + ps.hoursWeek + ' hours a week.'; }
     $('summaryText').textContent = summaryText(r, inp, placeName);
   }
   function houseLabel(h) {
@@ -707,6 +795,67 @@
     }
     p('The place itself, with what the animals and garden bring in counted, runs about ' + money(rh(placeOnly(r))) + ' a year. Household spending and health insurance are on top of that.');
   }
+  /* ---------- living off it ---------- */
+  function drawPay(pl, r, inp) {
+    var C = D.costs.items;
+    var dealName = pl.dealName;
+    $('paySub').textContent = 'What the family needs each year, two ways to get there, and what it takes with ' + dealName.toLowerCase() + ' on grass leased at $' + (+inp.lease_rate || 0) + ' an acre. Typical figures.';
+    $('payTot').textContent = pl.head > 0 ? pl.head + ' head, ' + money(rh(pl.leaseNet)) + ' a year' : '';
+    var wrap = $('payPaths');
+    wrap.textContent = '';
+    [['own', 'Buy the place above', 'the place after what it brings in'], ['rent', 'Rent a house, lease the grass', 'rent, household and health insurance']].forEach(function (def) {
+      var p = pl.paths[def[0]];
+      var col = document.createElement('div'); col.className = 'col';
+      var h = document.createElement('h5'); h.textContent = def[1]; col.appendChild(h);
+      function line(a, b) { var d = document.createElement('div'); d.className = 'line'; var s1 = document.createElement('span'); s1.textContent = a; var s2 = document.createElement('span'); s2.textContent = b; d.appendChild(s1); d.appendChild(s2); col.appendChild(d); }
+      line('Needs each year (' + def[2] + ')', money(rh(p.needs)));
+      if (pl.work > 0) line('Income you keep', '- ' + money(rh(pl.work)));
+      if (pl.head > 0) line(pl.head + ' head on ' + fmt(pl.acres) + ' leased acres clear', (pl.leaseNet >= 0 ? '- ' : '+ ') + money(rh(Math.abs(pl.leaseNet))));
+      var big = document.createElement('p'); big.className = 'big ' + (p.covered ? 'ok' : 'short');
+      big.textContent = p.covered ? 'Covered' : 'Short ' + money(rh(p.gapAfter)) + ' a year';
+      col.appendChild(big);
+      var s = p.solve[pl.deal];
+      var t = document.createElement('p'); t.className = 'txt';
+      if (p.gapBefore <= 0) t.textContent = 'What you keep from work covers it without cattle. Cash to start: ' + money(rh(p.runway + (def[0] === 'own' ? r.setupTotal.typ : 0))) + ' with ' + inp.runway_months + ' months in hand.';
+      else if (s.head == null) t.textContent = dealName + ' loses money per head at these rates, so no number of them closes the gap. Pick another deal or a cheaper lease.';
+      else t.textContent = 'To cover it with ' + dealName.toLowerCase() + ': ' + s.head + ' head on about ' + fmt(s.acres) + ' leased acres. Cash to start ' + money(rh(s.cashToStart)) + (def[0] === 'own' ? ' (the place, the cattle setup and ' : ' (the cattle setup and ') + inp.runway_months + ' months in hand). About ' + s.hoursWeek + ' hours a week.' + (s.rampYears ? ' Start with ' + s.startHalf + ' cows, keep the heifers, and you are at ' + s.head + ' in about ' + s.rampYears + ' years.' : '');
+      col.appendChild(t);
+      if (p.gapBefore > 0 && s.head != null && s.acres !== +inp.lease_acres) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'toggle use'; b.textContent = 'Put ' + fmt(s.acres) + ' leased acres in the form';
+        b.addEventListener('click', function () { $('lease_acres').value = s.acres; render(); });
+        col.appendChild(b);
+      }
+      wrap.appendChild(col);
+    });
+
+    /* ways in, for the rent-and-lease path */
+    var p2 = pl.paths.rent;
+    $('ladderSub').textContent = 'Per head on leased grass at your rates. What each way puts in, what it clears, and what it takes to cover ' + money(rh(Math.max(0, p2.gapBefore))) + ' a year renting a house' + (pl.work > 0 ? ' with what you keep from work' : '') + '. Overlap is fine: many men do two of these at once.';
+    var ol = $('ladder'); ol.textContent = '';
+    var rows = calc.DEALS.map(function (d) { return p2.solve[d]; });
+    rows.sort(function (a, b) { var ca = a.head == null ? 1e15 : a.cashToStart, cb = b.head == null ? 1e15 : b.cashToStart; return ca - cb; });
+    rows.forEach(function (s) {
+      var li = document.createElement('li'); if (s.deal === pl.deal) li.className = 'pick';
+      var amt = document.createElement('div'); amt.className = 'amt';
+      amt.textContent = s.head == null ? 'No' : money(rh(s.cashToStart));
+      var per = document.createElement('span'); per.className = 'per'; per.textContent = s.head == null ? 'does not pay' : 'to start'; amt.appendChild(per);
+      var body = document.createElement('div');
+      var ttl = document.createElement('p'); ttl.className = 'ttl';
+      ttl.textContent = s.name + (s.head == null ? '' : s.head === 0 ? ': nothing needed' : ': ' + s.head + ' head on ' + fmt(s.acres) + ' acres, ' + s.hoursWeek + ' hours a week');
+      var txt = document.createElement('p'); txt.className = 'txt';
+      var perHead = (s.capital > 0 ? 'Puts in ' + money(s.capital) + ' a head' + (s.turns ? ' each season, back in the fall' : '') + '. ' : 'Nothing to buy but panels and a chute. ') +
+        (s.net > 0 ? 'Clears ' + money(s.net) + ' a head a year' : 'Loses ' + money(-s.net) + ' a head a year') +
+        (s.direct ? (s.direct > 0 ? ', of which ' + money(s.direct) + ' is from selling beef direct' : ', selling direct costs ' + money(-s.direct) + ' of that') : '') + '. ';
+      txt.textContent = perHead + s.note;
+      body.appendChild(ttl); body.appendChild(txt);
+      li.appendChild(amt); li.appendChild(body); ol.appendChild(li);
+    });
+
+    var f = pl.fsa;
+    var own = pl.perHead.own;
+    var cowsPerMicro = own.net > 0 ? Math.floor(f.microMax / own.capital) : 0;
+    $('fsaNote').textContent = 'Money: FSA lends beginning farmers (anyone under ten years in) up to ' + money(f.operatingMax) + ' for cattle at ' + f.standardPct + '% over ' + f.years + ' years, and microloans to ' + money(f.microMax) + ' capped at ' + f.ratePct + '%. A ' + money(f.microMax) + ' microloan runs about ' + money(rh(f.microPayment)) + ' a year, which buys about ' + cowsPerMicro + ' bred cows' + (own.net > 0 ? ' that clear about ' + money(rh(cowsPerMicro * own.net)) + ' a year at these rates' : '') + '. Rates as of November 2026.';
+  }
   /* ---------- ways to bring it down ---------- */
   function drawTips(tips) {
     var ol = $('tips');
@@ -755,6 +904,15 @@
     L.push('Each year:');
     r.annual.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); });
     if (r.income.length) { L.push('Brings in:'); r.income.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); }); }
+    if (lastPlan) {
+      var P = lastPlan.paths.rent, sv = P.solve[lastPlan.deal];
+      L.push('');
+      L.push('Living off it, renting a house and leasing grass:');
+      L.push('  Family needs each year: ' + money(rh(P.needs)) + (lastPlan.work ? ', less ' + money(rh(lastPlan.work)) + ' kept from work' : ''));
+      if (P.gapBefore <= 0) L.push('  Covered by what you keep from work');
+      else if (sv.head == null) L.push('  ' + lastPlan.dealName + ' loses money per head at these rates');
+      else L.push('  ' + lastPlan.dealName + ': ' + sv.head + ' head on about ' + fmt(sv.acres) + ' leased acres at $' + (+inp.lease_rate || 0) + '/ac, clears ' + money(sv.net) + ' a head, ' + money(rh(sv.cashToStart)) + ' to start, ' + sv.hoursWeek + ' hours a week');
+    }
     var tips = calc.tips(inp, D, r).slice(0, 3);
     if (tips.length) { L.push(''); L.push('Ways to bring it down:'); tips.forEach(function (t) { L.push('  ' + t.title + ': ' + money(rh(t.amount)) + (t.perYear ? ' a year' : '')); }); }
     L.push('');
