@@ -132,6 +132,14 @@
   .est { display: inline-block; font-size: 12px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; line-height: 1.5; vertical-align: middle; margin-left: 4px; }
 
   .walk p { margin: 6px 0; }
+  .tips ol { list-style: none; padding: 0; margin: 0; }
+  .tips li { display: grid; grid-template-columns: 118px 1fr; gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--rule); align-items: start; }
+  .tips li:first-child { border-top: 0; }
+  .tips .amt { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; }
+  .tips .per { display: block; font-family: var(--font-body); font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 3px; text-transform: none; }
+  .tips .ttl { font-weight: 600; margin: 0 0 3px; }
+  .tips .txt { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.4; }
+  @media (max-width: 560px) { .tips li { grid-template-columns: 1fr; gap: 2px; } .tips .amt { font-size: 21px; } .tips .per { display: inline; margin-left: 6px; } }
   .walk .big { font-size: 28px; font-weight: 600; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
   .flash { font-size: 14px; color: var(--step); min-height: 20px; margin: 6px 0 0; }
@@ -318,6 +326,12 @@
         </div>
         <p class="flash" id="flash" aria-live="polite"></p>
         <details><summary class="toggle">See the summary text</summary><pre class="summary" id="summaryText"></pre></details>
+      </div>
+
+      <div class="card tips">
+        <h3>Ways to bring it down</h3>
+        <p class="sub">Figured from your numbers above. Each one shows what changes if you do it. Yearly savings are ranked as five years' worth. They overlap, so do not add them all up.</p>
+        <ol id="tips"></ol>
       </div>
 
       <div class="card">
@@ -526,6 +540,7 @@
     drawChart(groups);
     drawLines(r);
     drawWalk(r, inp);
+    drawTips(calc.tips(inp, D, r));
     $('summaryText').textContent = summaryText(r, inp, placeName);
   }
   function houseLabel(h) {
@@ -692,6 +707,22 @@
     }
     p('The place itself, with what the animals and garden bring in counted, runs about ' + money(rh(placeOnly(r))) + ' a year. Household spending and health insurance are on top of that.');
   }
+  /* ---------- ways to bring it down ---------- */
+  function drawTips(tips) {
+    var ol = $('tips');
+    ol.textContent = '';
+    if (!tips.length) { var e = document.createElement('li'); e.textContent = 'Nothing obvious to cut on these numbers.'; ol.appendChild(e); return; }
+    tips.forEach(function (t) {
+      var li = document.createElement('li');
+      var amt = document.createElement('div'); amt.className = 'amt'; amt.textContent = money(rh(t.amount));
+      var per = document.createElement('span'); per.className = 'per'; per.textContent = t.perYear ? 'a year' : 'one time'; amt.appendChild(per);
+      var body = document.createElement('div');
+      var ttl = document.createElement('p'); ttl.className = 'ttl'; ttl.textContent = t.title;
+      var txt = document.createElement('p'); txt.className = 'txt'; txt.textContent = t.text;
+      body.appendChild(ttl); body.appendChild(txt);
+      li.appendChild(amt); li.appendChild(body); ol.appendChild(li);
+    });
+  }
   function placeOnly(r) {
     var t = 0;
     r.annual.forEach(function (l) { if (l.key !== 'household' && l.key !== 'health') t += l.typ; });
@@ -724,6 +755,8 @@
     L.push('Each year:');
     r.annual.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); });
     if (r.income.length) { L.push('Brings in:'); r.income.forEach(function (l) { L.push('  ' + pad(l.label, 28) + money(rh(l.typ))); }); }
+    var tips = calc.tips(inp, D, r).slice(0, 3);
+    if (tips.length) { L.push(''); L.push('Ways to bring it down:'); tips.forEach(function (t) { L.push('  ' + t.title + ': ' + money(rh(t.amount)) + (t.perYear ? ' a year' : '')); }); }
     L.push('');
     L.push('Planning figures from USDA, extension services and other public tables. Not quotes. Run your own numbers: ' + toUrl());
     return L.join('\n');

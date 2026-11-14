@@ -14,6 +14,7 @@ You set up the place on paper. The page adds it up three ways: low, typical, hig
 - **Each year**: property tax, insurance, keeping the animals, fence and equipment upkeep, well and septic, power, garden, health insurance, household spending.
 - **What the place brings in**: calves, goat kids, eggs and garden food you no longer buy.
 - **Walking away from town**: cash to have in hand (setup plus months of runway), and how many years until the move pays for itself against what you spend now.
+- **Ways to bring it down**: tips figured from your own inputs (buy fenced land, high-tensile fence, house near the road, used mobile home first, ag valuation, half the cows and keep heifers, rent grass, hire out tractor work, put off the barn, fix health insurance), each with what it changes on your numbers. The top three go into the summary text.
 
 Every line shows its range and where the figure came from. A line marked **estimate** has no published source behind it, and the basis is explained. The **Copy summary** button gives plain text to paste into a post.
 
@@ -55,7 +56,7 @@ The **Copy link** button on the page produces this URL for the current inputs. O
 
 ```
 index.html          the page (layout, inputs, chart, summary)
-calc.js             the arithmetic, no page code, shared with the tests
+calc.js             the arithmetic and the cost-cutting tips, no page code, shared with the tests
 data/costs.json     every cost item with low / typical / high and a source id
 data/land_values.json   USDA state land values and pasture rents
 data/property_tax.json  Tax Foundation effective rates by state

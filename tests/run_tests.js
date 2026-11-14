@@ -123,6 +123,27 @@ check('every line cites a source that exists', r.setup.concat(r.annual, r.income
 const r2 = calc.compute(Object.assign({}, inp, { price_per_acre: 5200 }), D);
 check('price=5200 override: land = ' + money(40 * 5200), near(line(r2.setup, 'land').typ, 208000));
 
+/* Ways to bring it down */
+const tips = calc.tips(inp, D, r);
+const tipOf = (k) => tips.find((t) => t.key === k);
+check('tips: every tip has a positive amount, a title and text', tips.length > 0 && tips.every((t) => t.amount > 0 && t.title && t.text));
+check('tips: fenced land saves the whole fence line', tipOf('fence_standing') && near(tipOf('fence_standing').amount, line(r.setup, 'fence').typ, 1));
+check('tips: high-tensile saves 6,600 ft x (barbed - high-tensile)', tipOf('hightensile') && near(tipOf('hightensile').amount, 6600 * (items.fence_barbed_per_ft.typ - items.fence_hightensile_per_ft.typ), 2));
+check('tips: house near the road saves (300 - 100) ft of line', tipOf('power_close') && near(tipOf('power_close').amount, 200 * items.electric_line_per_ft.typ, 1));
+check('tips: putting off the barn saves the barn line', tipOf('skip_barn') && near(tipOf('skip_barn').amount, line(r.setup, 'barn').typ, 1));
+check('tips: half the cows saves 5 x bred cow price', tipOf('fewer_cows') && near(tipOf('fewer_cows').amount, 5 * items.cow_bred.typ, 1));
+check('tips: health insurance saving = (family - single) x 12, per year', tipOf('health') && tipOf('health').perYear && near(tipOf('health').amount, (inp.health_monthly - items.health_family_monthly.low) * 12, 1));
+check('tips: no ag tip when the ag box is checked, no used-mobile tip when already a used mobile', !tipOf('ag_valuation') && !tipOf('used_mobile'));
+const rank = (t) => (t.perYear ? t.amount * 5 : t.amount);
+check('tips: ranked biggest first (yearly counted as five years)', tips.every((t, i) => i === 0 || rank(tips[i - 1]) >= rank(t)));
+const r3in = Object.assign({}, inp, { ag_exempt: false, house: 'mobile_new' });
+const r3 = calc.compute(r3in, D);
+const t3 = calc.tips(r3in, D, r3);
+const ag = t3.find((t) => t.key === 'ag_valuation');
+check('tips: ag valuation saves rate x land x (1 - ag share) per year when the box is off', ag && ag.perYear && near(ag.amount, 40 * price * (1 - items.ag_valuation_share.typ) * fannin[4] / 100, 2));
+const um = t3.find((t) => t.key === 'used_mobile');
+check('tips: used mobile instead of new saves the price difference', um && near(um.amount, (items.house_mobile_new.typ + items.mobile_setup.typ) - (items.house_mobile_used.typ + items.mobile_setup.typ), 2));
+
 console.log('\nWorked example, typical figures:');
 console.log('  Setup total      ' + money(r.setupTotal.typ) + '  (' + money(r.setupTotal.low) + ' to ' + money(r.setupTotal.high) + ')');
 for (const g of calc.groupSetup(r.setup)) console.log('    ' + g.label.padEnd(22) + money(g.typ).padStart(10));

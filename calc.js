@@ -230,5 +230,126 @@
     return out;
   }
 
-  root.HCcalc = { compute: compute, fenceFeet: fenceFeet, groupSetup: groupSetup, fmt: fmt, GROUPS: GROUPS };
+  /* Ways to bring the cost down. Each tip is figured from the man's own inputs and the same cost
+     items as the lines above, so the amount shown is what changes on his numbers, not a slogan.
+     amount is one-time dollars unless perYear is true. Only tips that apply are returned, biggest first. */
+  function tips(inp, data, r) {
+    var C = data.costs.items;
+    var out = [];
+    function it(k) { if (!C[k]) throw new Error('missing cost item ' + k); return C[k]; }
+    function L(key) { return pick(r.setup, key) || pick(r.annual, key); }
+    function val(key) { var l = L(key); return l ? l.typ : 0; }
+    function tip(key, amount, perYear, title, text, source) {
+      if (!(amount > 0)) return;
+      out.push({ key: key, amount: Math.round(amount), perYear: !!perYear, title: title, text: text, source: source || '' });
+    }
+    var acres = Math.max(0, +inp.acres || 0), price = Math.max(0, +inp.price_per_acre || 0);
+    var landTotal = acres * price;
+    var taxRate = (+inp.tax_rate || 0) / 100;
+    var cows = Math.max(0, +inp.cows || 0), horses = Math.max(0, +inp.horses || 0);
+
+    /* Fence */
+    var fenceLine = L('fence');
+    if (fenceLine) {
+      tip('fence_standing', fenceLine.typ, false, 'Buy land that is already fenced',
+        'Fence is $' + fmt(fenceLine.typ) + ' here. A standing fence in fair shape saves most of it. Walk every foot before you buy, and set the "fence already standing" slider to what you find.');
+      var fenceKey = inp.fence_type === 'woven' ? 'fence_woven_per_ft' : inp.fence_type === 'hightensile' ? 'fence_hightensile_per_ft' : 'fence_barbed_per_ft';
+      var newFt = fenceLine.typ / it(fenceKey).typ;
+      if (fenceKey !== 'fence_hightensile_per_ft') {
+        tip('hightensile', newFt * (it(fenceKey).typ - it('fence_hightensile_per_ft').typ), false, 'Use high-tensile electric fence',
+          'About $' + it('fence_hightensile_per_ft').typ.toFixed(2) + ' a foot built against $' + it(fenceKey).typ.toFixed(2) + ' for what you picked. Cattle respect it once they learn it. Not for goats.', it('fence_hightensile_per_ft').source);
+      }
+      var pastures = Math.max(1, +inp.pastures || 1);
+      if (pastures > 2) {
+        var side = Math.sqrt(acres * SQFT_PER_ACRE);
+        var existingPct = Math.min(100, Math.max(0, +inp.fence_existing_pct || 0)) / 100;
+        tip('pastures', (pastures - 2) * side * (1 - existingPct) * it(fenceKey).typ, false, 'Start with two pastures, not ' + pastures,
+          'Fence the outside and one cross fence. Add the rest after a year of watching where the cattle graze and where the water is.');
+      }
+    }
+
+    /* Power */
+    if (inp.power === 'grid') {
+      var dist = Math.max(0, +inp.power_distance || 0);
+      if (dist > 100) {
+        tip('power_close', (dist - 100) * it('electric_line_per_ft').typ, false, 'Set the house near the road',
+          'Line runs about $' + fmt(it('electric_line_per_ft').typ) + ' a foot. Many co-ops give the first few hundred feet free, so ask the co-op before you pick the house site.', it('electric_line_per_ft').source);
+      }
+      var gridCost = val('power_line') + val('power_drop');
+      if (gridCost > it('solar_offgrid').typ) {
+        tip('solar_instead', gridCost - it('solar_offgrid').typ, false, 'Go solar instead of running the line',
+          'At ' + fmt(dist) + ' ft the line costs more than an off-grid solar system with batteries. Get a bid on both.', it('solar_offgrid').source);
+      }
+    }
+
+    /* Septic */
+    if (inp.septic === 'aerobic') {
+      tip('soil_test', it('septic_aerobic').typ - it('septic_conventional').typ, false, 'Get a soil test before you buy',
+        'An aerobic system is forced on you by soil that will not drain. A conventional tank and field is the difference shown, plus no yearly service contract.', it('septic_conventional').source);
+    }
+
+    /* House */
+    var houseNow = val('house') + val('house_setup');
+    var usedMobile = it('house_mobile_used').typ + it('mobile_setup').typ;
+    if (inp.house !== 'existing' && inp.house !== 'mobile_used' && houseNow > usedMobile) {
+      tip('used_mobile', houseNow - usedMobile, false, 'Live in a used mobile home first',
+        'Set it up for about $' + fmt(usedMobile) + ' and live in it while you build. Later it is the guest house, a place for the hired hand, or sold.', it('house_mobile_used').source);
+    }
+    var improvements = houseNow + val('well_drill') + val('well_pump') + val('septic') + val('power_line') + val('power_drop') + val('power');
+    if (inp.house !== 'existing' && improvements > 0) {
+      tip('buy_improved', improvements, false, 'Buy a place with the house, well and septic already there',
+        'That is $' + fmt(improvements) + ' of new work on these numbers. You pay for them in the asking price, but used improvements rarely bring what new ones cost, and you skip months of waiting on contractors. Have the well and septic inspected.');
+    }
+
+    /* Tax */
+    if (!inp.ag_exempt && landTotal > 0 && taxRate > 0) {
+      tip('ag_valuation', landTotal * (1 - it('ag_valuation_share').typ) * taxRate, true, 'File for ag valuation the day you close',
+        'Land running cattle or hay is taxed on what it produces, not what it sells for, in most states. Ask the county appraisal district what it takes to qualify. Check the ag box above to see it on your numbers.', it('ag_valuation_share').source);
+    }
+
+    /* Animals */
+    if (cows >= 4) {
+      var half = Math.floor(cows / 2);
+      tip('fewer_cows', half * it('cow_bred').typ, false, 'Start with half the cows and keep your heifers',
+        'A bred cow is about $' + fmt(it('cow_bred').typ) + ' right now. Buy ' + (cows - half) + ' instead of ' + cows + ', keep the heifer calves, and the herd is full in about three years, paid for by calf checks.', it('cow_bred').source);
+    }
+    if (horses > 0) {
+      tip('horses', val('horses_keep'), true, 'Skip the horses unless you will work them',
+        'Horses cost this much a year and bring in nothing. If you only ride on Sundays, a neighbor with horses is cheaper.', it('horse_annual').source);
+    }
+    var land = data.land.states[inp.state];
+    if (land && land.pasture_rent > 0 && price > 0 && acres >= 20) {
+      var tenAcresBuy = 10 * price * (1 + it('closing_pct').typ);
+      tip('rent_grass', tenAcresBuy, false, 'Rent grass instead of buying more acres',
+        'Pasture rents for about $' + land.pasture_rent.toFixed(2) + ' an acre a year in your state. Buying runs $' + fmt(price) + ' an acre. Every 10 acres you rent from a neighbor instead of buying saves this much up front and costs about $' + fmt(10 * land.pasture_rent) + ' a year.', 'USDA NASS cash rents');
+    }
+
+    /* Equipment and buildings */
+    if (inp.tractor) {
+      tip('hire_tractor', val('tractor'), false, 'Hire out the tractor work the first year',
+        'Pay a neighbor to shred, disc and bale. Buy a tractor when you know what size you need, and skip about $' + fmt(it('tractor_used').typ * it('equipment_upkeep_pct').typ) + ' a year of repairs and fuel meanwhile.', it('tractor_used').source);
+    }
+    if (val('barn') > 0) {
+      tip('skip_barn', val('barn'), false, 'Put off the barn',
+        'Cattle do fine with shade and a windbreak. A used carport covers the equipment. Build the barn in year three, when you know where it should sit.', it('barn_sqft').source);
+    }
+    if (inp.utv) {
+      tip('skip_utv', val('utv'), false, 'Skip the side-by-side', 'The truck and your feet cover 40 acres. Buy one used later if you still want it.', it('utv').source);
+    }
+
+    /* Health insurance */
+    var hi = Math.max(0, +inp.health_monthly || 0);
+    var single = it('health_family_monthly').low;
+    if (hi > single) {
+      tip('health', (hi - single) * 12, true, 'Fix the health insurance before you quit',
+        'The default is the full family premium an employer pays, about what COBRA costs. One man on the marketplace runs about $' + fmt(single) + ' a month before any subsidy, and a lower income out there often qualifies for one. Or keep a job with benefits part time, or get on a spouse plan.', it('health_family_monthly').source);
+    }
+
+    /* Rank yearly savings as five years' worth so a big yearly saving is not buried under one-time items. */
+    function rank(t) { return t.perYear ? t.amount * 5 : t.amount; }
+    out.sort(function (a, b) { return rank(b) - rank(a); });
+    return out;
+  }
+
+  root.HCcalc = { compute: compute, tips: tips, fenceFeet: fenceFeet, groupSetup: groupSetup, fmt: fmt, GROUPS: GROUPS };
 })(typeof window !== 'undefined' ? window : globalThis);
