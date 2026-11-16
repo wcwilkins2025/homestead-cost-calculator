@@ -1,10 +1,10 @@
-# Brotherhood Homestead Cost Calculator
+# Homestead Cost Calculator
 
 What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. One page, no login, no tracking, every default traced to a public source.
 
 Live page: https://wcwilkins2025.github.io/homestead-cost-calculator/
 
-Companion to the [Brotherhood Land Finder](https://wcwilkins2025.github.io/brotherhood-land-finder/), which ranks every US county for a self-sustaining life. Pick a county there, then come here to see what it costs.
+Companion to the [Land Finder](https://thelandfinder.org/), which ranks every US county for a self-sustaining life. Pick a county there, then come here to see what it costs.
 
 ## What it does
 

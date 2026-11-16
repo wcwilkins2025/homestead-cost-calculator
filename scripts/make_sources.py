@@ -25,7 +25,7 @@ for s in tax["source_list"]:
 for s in counties["source_list"]:
     L.append("| County table (land value per acre, median recorded well depth, tax rate) | " + s["name"] + " | " + s["date"] + " | " + s["url"] + " |")
 L.append("")
-L.append("The county table was built from the Brotherhood Land Finder's public county file (same three sources) by `scripts/build_counties.py`. USGS well depths are medians of wells on record in the county, which skew toward irrigation and test wells; the page shows them as a hint only.\n")
+L.append("The county table was built from the Land Finder's public county file (same three sources) by `scripts/build_counties.py`. USGS well depths are medians of wells on record in the county, which skew toward irrigation and test wells; the page shows them as a hint only.\n")
 
 L.append("## Cost items\n")
 L.append("| Item | Low | Typical | High | Unit | Source |\n|---|---:|---:|---:|---|---|")

@@ -15,7 +15,7 @@ Items marked **estimate** have no published figure behind them. The basis says h
 | County table (land value per acre, median recorded well depth, tax rate) | USGS National Water Information System, groundwater site inventory: median recorded well depth by county | inventory as of November 13, 2026 | https://waterservices.usgs.gov/nwis/site/ |
 | County table (land value per acre, median recorded well depth, tax rate) | Census Bureau, ACS 2019-2023 5-year, tables B25077 and B25103: median property tax paid as a share of median home value, by county | 2019-2023 | https://data.census.gov/ |
 
-The county table was built from the Brotherhood Land Finder's public county file (same three sources) by `scripts/build_counties.py`. USGS well depths are medians of wells on record in the county, which skew toward irrigation and test wells; the page shows them as a hint only.
+The county table was built from the Land Finder's public county file (same three sources) by `scripts/build_counties.py`. USGS well depths are medians of wells on record in the county, which skew toward irrigation and test wells; the page shows them as a hint only.
 
 ## Cost items
 
