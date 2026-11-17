@@ -1,6 +1,6 @@
 # Homestead Cost Calculator
 
-What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. One page, no login, no tracking, every default traced to a public source.
+What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. One page, no tracking, every default traced to a public source. Signing in is optional and only needed to save plans.
 
 Live page: https://wcwilkins2025.github.io/homestead-cost-calculator/
 
@@ -46,6 +46,15 @@ The place is where you live. The **Make it pay** group is how to earn a living f
 
 The page shows what the family needs each year two ways (buy the place above, or rent a house and lease the grass), what the lease you entered clears, and for each way in how many head on how many acres cover the gap, the cash to start (cattle, handling setup, and your months in hand), hours a week, and for owned cows the years to grow from half a herd keeping heifers. Selling finished beef by the half or quarter is figured against what the weaned calf would have brought (USDA AMS grass-fed report, Arkansas and Michigan State extension). FSA beginning-farmer loan limits and rates are shown with the yearly payment on a microloan. Extra inputs: `cow_deal` (own, share, custom, stocker), `lease_acres`, `lease_rate`, `graze_apc`, `sell_how` (barn, direct), `work_income`, `rent_monthly`.
 
+## Saved plans
+
+Anyone can use the page without an account. Signing in lets a person keep several named sets of inputs and open them on any device. It uses the same account and Supabase project as [Groundwork](https://groundworkpath.org/): sign-in is by an emailed link, with no password.
+
+- Table `public.calc_plans` (see `supabase/calc_plans.sql`): name, inputs, dates, one row per saved plan. Row rules let a signed-in person see and change only their own rows, and people who are not signed in get nothing. Up to 50 plans each.
+- Only the page's own input ids are saved (`plans.js` cleans them on the way in and out).
+- Closing the account on Groundwork's account page deletes the saved plans with it.
+- `config.js` holds the project address and the publishable key, both made to be public. The secret key is never in this repo.
+
 ## Deep link
 
 Any input can be set from the URL, so another page can send someone straight to their county with the numbers filled in:
@@ -71,6 +80,9 @@ The **Copy link** button on the page produces this URL for the current inputs. O
 ```
 index.html          the page (layout, inputs, chart, summary)
 calc.js             the arithmetic and the cost-cutting tips, no page code, shared with the tests
+plans.js            saved plans: sign-in and the calc_plans table, plus the input cleaning the tests check
+config.js           Supabase project address and publishable key (public by design)
+supabase/calc_plans.sql  the saved-plans table and its row rules (run once in the Supabase SQL editor)
 data/costs.json     every cost item with low / typical / high and a source id
 data/land_values.json   USDA state land values and pasture rents
 data/property_tax.json  Tax Foundation effective rates by state
@@ -78,7 +90,7 @@ data/counties.json  all 3,144 counties: USDA land value, USGS well depth, Census
 data/bundle.js      the four JSON files joined into one script so the page works from a plain file open
 sources.md          every source, with date, link and what was taken from it
 scripts/            build_counties.py and bundle_data.py (Python, standard library only)
-tests/run_tests.js  checks the arithmetic on a worked example (Node)
+tests/run_tests.js  checks the arithmetic on a worked example and the saved-plans input cleaning (Node)
 ```
 
 After editing any JSON file, run:
@@ -96,7 +108,7 @@ Open `index.html` in a browser, or serve the folder with any static server:
 python -m http.server 8788
 ```
 
-No build step, no backend, no dependencies beyond two Google Fonts.
+No build step and no server of our own. The page loads two Google Fonts and supabase-js (for saved plans only).
 
 ## Honest limits
 

@@ -186,5 +186,31 @@ console.log('  Yearly, net      ' + money(r.netAnnual.typ) + '  (' + money(r.net
 console.log('  Cash in hand     ' + money(r.walk.cashNeeded.typ));
 console.log('  Payback          ' + (r.walk.paybackYears == null ? 'never on these numbers' : r.walk.paybackYears.toFixed(1) + ' years'));
 
+/* Saved plans: the helpers that clean what goes into and comes out of the database. */
+{
+  const ps = { window: {} }; ps.window.window = ps.window; vm.createContext(ps);
+  vm.runInContext(read('plans.js'), ps);
+  const P = ps.window.HCplans;
+  check('plans.js loads', !!P);
+  check('no store without supabase-js', P.makeStore() === null);
+  const html = read('index.html');
+  const body = html.match(/var DEFAULTS = \{([\s\S]*?)\n  \};/)[1].replace(/'[^']*'/g, "''");
+  const ids = (body.match(/(?:^|[,{\s])([a-z_]+):/g) || []).map((k) => k.replace(/[^a-z_]/g, ''));
+  const checks = JSON.parse(html.match(/var CHECKS = (\[[^\]]*\]);/)[1].replace(/'/g, '"'));
+  check('page input ids found', ids.length > 30 && ids.indexOf('acres') >= 0, ids.length + ' ids');
+  const form = { state: 'TX', county: 'Fannin County', acres: '40', garden: true, bull: false, evil: '<script>', price_per_acre: '5200' };
+  const clean = P.cleanInputs(form, ids, checks);
+  check('unknown fields dropped', !('evil' in clean));
+  check('checkboxes kept as true/false', clean.garden === true && clean.bull === false);
+  check('text kept as text', clean.acres === '40' && clean.price_per_acre === '5200');
+  const back = P.cleanInputs(JSON.parse(JSON.stringify(clean)), ids, checks);
+  check('save and open round trip', JSON.stringify(back) === JSON.stringify(clean));
+  check('checkbox from stored text', P.cleanInputs({ garden: 'true', bull: '0' }, ids, checks).garden === true && P.cleanInputs({ bull: '0' }, ids, checks).bull === false);
+  check('long values cut short', P.cleanInputs({ acres: 'x'.repeat(500) }, ids, checks).acres.length === 60);
+  check('suggested name', P.suggestName(form) === '40 acres, Fannin County, TX', P.suggestName(form));
+  check('name trimmed and capped', P.cleanName('  a   b  ') === 'a b' && P.cleanName('y'.repeat(200)).length === P.MAX_NAME);
+  check('find plan by name ignores case', P.findByName([{ id: 1, name: 'Fannin 40' }], ' fannin  40 ').id === 1 && P.findByName([], 'x') === null);
+}
+
 console.log(failures ? '\n' + failures + ' check(s) FAILED' : '\nAll checks passed');
 process.exit(failures ? 1 : 0);

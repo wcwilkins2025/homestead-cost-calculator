@@ -172,6 +172,15 @@
   .walk .big { font-size: 28px; font-weight: 600; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
   .flash { font-size: 14px; color: var(--step); min-height: 20px; margin: 6px 0 0; }
+  .plans form, .plans .saverow { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin: 10px 0; }
+  .plans .field { flex: 1 1 220px; margin: 0; }
+  .plans input[type=email] { width: 100%; font: inherit; font-size: 17px; padding: 8px 10px; border: 1px solid var(--rule); background: var(--bg); color: var(--fg); }
+  .plans .small { font-size: 14px; }
+  .planlist { list-style: none; padding: 0; margin: 10px 0 0; }
+  .planlist li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--rule); }
+  .planlist .pname { flex: 1 1 200px; font-weight: 600; overflow-wrap: anywhere; }
+  .planlist .pdate { font-size: 14px; }
+  .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   pre.summary { white-space: pre-wrap; font: 14px/1.45 ui-monospace, Consolas, monospace; background: var(--field); border: 1px solid var(--rule); padding: 12px; margin: 10px 0 0; max-height: 320px; overflow: auto; }
 
   .sources ol { padding-left: 20px; font-size: 14.5px; }
@@ -392,6 +401,27 @@
         <details><summary class="toggle">See the summary text</summary><pre class="summary" id="summaryText"></pre></details>
       </div>
 
+      <div class="card plans" id="plansCard">
+        <h3>Your saved plans</h3>
+        <div id="plansOut">
+          <p>Sign in to keep several sets of numbers and open them on any device. It is the same account as Groundwork. There is no password: you get a sign-in link by email.</p>
+          <form id="signInForm">
+            <div class="field"><label for="signEmail">Email</label><input id="signEmail" type="email" autocomplete="email" required maxlength="200"></div>
+            <button type="submit" class="btn">Email me a sign-in link</button>
+          </form>
+        </div>
+        <div id="plansIn" hidden>
+          <p class="small">Signed in as <b id="whoEmail"></b>. <button type="button" class="linkish" id="signOutBtn">Sign out</button></p>
+          <div class="saverow">
+            <div class="field"><label for="planName">Name for these numbers</label><input id="planName" type="text" maxlength="80"></div>
+            <button type="button" class="btn" id="savePlanBtn">Save these numbers</button>
+          </div>
+          <ul class="planlist" id="planList"></ul>
+        </div>
+        <p class="flash" id="plansFlash" aria-live="polite"></p>
+        <p class="small">Only your email and the plans you save are kept. Delete a plan here anytime. To close the account, use <a href="https://groundworkpath.org/account.html" rel="noopener">Groundwork's account page</a>.</p>
+      </div>
+
       <div class="card pay">
         <h3>Living off it</h3>
         <p class="sub" id="paySub"></p>
@@ -432,6 +462,9 @@
 
 <script src="data/bundle.js"></script>
 <script src="calc.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="plans.js"></script>
 <script>
 (function () {
   'use strict';
@@ -994,6 +1027,72 @@
   });
   $('copyBtn').addEventListener('click', function () { copyText($('summaryText').textContent, 'Summary copied. Paste it anywhere.'); });
   $('linkBtn').addEventListener('click', function () { copyText(toUrl(), 'Link copied.'); });
+
+  /* ---------- saved plans (signed in) ---------- */
+  var P = window.HCplans, store = P && P.makeStore(), plans = [];
+  function pflash(msg) { $('plansFlash').textContent = msg; }
+  function niceErr(e) {
+    var m = (e && e.message) || '';
+    if (/calc_plans|relation|schema cache/i.test(m)) return 'Saving is not switched on yet. Try again later.';
+    if (/rate limit|security purposes/i.test(m)) return 'Too many sign-in emails just now. Wait a minute and try again.';
+    return m || 'Something went wrong. Try again.';
+  }
+  function drawPlans() {
+    var ul = $('planList'); ul.textContent = '';
+    if (!plans.length) { var li0 = document.createElement('li'); li0.textContent = 'No saved plans yet.'; ul.appendChild(li0); return; }
+    plans.forEach(function (pl) {
+      var li = document.createElement('li');
+      var n = document.createElement('span'); n.className = 'pname'; n.textContent = pl.name;
+      var d = document.createElement('span'); d.className = 'pdate'; d.textContent = new Date(pl.updated_at).toLocaleDateString();
+      li.appendChild(n); li.appendChild(d);
+      [['Open', function () { openPlan(pl); }], ['Rename', function () { renamePlan(pl); }], ['Delete', function () { deletePlan(pl); }]].forEach(function (b) {
+        var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn ghost'; btn.textContent = b[0];
+        btn.setAttribute('aria-label', b[0] + ' ' + pl.name); btn.addEventListener('click', b[1]); li.appendChild(btn);
+      });
+      ul.appendChild(li);
+    });
+  }
+  function loadPlans() {
+    return store.list().then(function (rows) { plans = rows || []; drawPlans(); }, function (e) { plans = []; drawPlans(); pflash(niceErr(e)); });
+  }
+  function showUser(u) {
+    $('plansOut').hidden = !!u; $('plansIn').hidden = !u;
+    if (u) { $('whoEmail').textContent = u.email || ''; if (!$('planName').value) $('planName').value = P.suggestName(readForm()); loadPlans(); }
+  }
+  function openPlan(pl) {
+    applyDefaults(P.cleanInputs(pl.inputs || {}, IDS, CHECKS));
+    $('planName').value = pl.name;
+    pflash('Opened ' + pl.name + '.');
+  }
+  function renamePlan(pl) {
+    var name = P.cleanName(window.prompt('New name for this plan', pl.name));
+    if (!name || name === pl.name) return;
+    store.update(pl.id, { name: name }).then(function () { pflash('Renamed.'); return loadPlans(); }, function (e) { pflash(niceErr(e)); });
+  }
+  function deletePlan(pl) {
+    if (!window.confirm('Delete "' + pl.name + '"? This cannot be undone.')) return;
+    store.remove(pl.id).then(function () { pflash('Deleted ' + pl.name + '.'); return loadPlans(); }, function (e) { pflash(niceErr(e)); });
+  }
+  if (!store) {
+    $('plansOut').textContent = 'Saving plans is not available right now. Use "Copy link to these numbers" to keep them.';
+  } else {
+    store.onChange(showUser);
+    store.user().then(showUser);
+    $('signInForm').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var email = $('signEmail').value.trim(); if (!email) return;
+      pflash('Sending...');
+      store.signIn(email, location.origin + location.pathname).then(function () { pflash('Check your email for the sign-in link. It opens this page signed in.'); }, function (e) { pflash(niceErr(e)); });
+    });
+    $('signOutBtn').addEventListener('click', function () { store.signOut().then(function () { plans = []; pflash('Signed out.'); }); });
+    $('savePlanBtn').addEventListener('click', function () {
+      var name = P.cleanName($('planName').value) || P.suggestName(readForm());
+      $('planName').value = name;
+      var inputs = P.cleanInputs(readForm(), IDS, CHECKS), same = P.findByName(plans, name);
+      var job = same ? store.update(same.id, { inputs: inputs }) : store.add(name, inputs);
+      job.then(function () { pflash((same ? 'Updated ' : 'Saved ') + name + '.'); return loadPlans(); }, function (e) { pflash(niceErr(e)); });
+    });
+  }
 })();
 </script>
 </body>
