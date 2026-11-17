@@ -2,7 +2,7 @@
 
 What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. One page, no tracking, every default traced to a public source. Signing in is optional and only needed to save plans.
 
-Live page: https://wcwilkins2025.github.io/homestead-cost-calculator/
+Live page: https://calculator.homesteadready.org/
 
 Companion to the [Land Finder](https://thelandfinder.org/), which ranks every US county for a self-sustaining life. Pick a county there, then come here to see what it costs.
 
@@ -60,7 +60,7 @@ Anyone can use the page without an account. Signing in lets a person keep severa
 Any input can be set from the URL, so another page can send someone straight to their county with the numbers filled in:
 
 ```
-https://wcwilkins2025.github.io/homestead-cost-calculator/?state=TX&county=Fannin&acres=40&price=5200
+https://calculator.homesteadready.org/?state=TX&county=Fannin&acres=40&price=5200
 ```
 
 | Parameter | Meaning |
