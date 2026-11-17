@@ -2,10 +2,13 @@
 
 Keeps only the fields the calculator needs: FIPS, name, state, USDA 2022 farm land value per acre,
 USGS median well depth, and the Census effective property tax rate.
-Source file: C:/Projects/brotherhood-land-finder/data/counties.json (built 2026-11-13).
+Source file: the Land Finder's data/counties.json (last built 2026-11-13).
+Usage: python scripts/build_counties.py <path to the Land Finder's data/counties.json>
 """
 import json, sys
-src = sys.argv[1] if len(sys.argv) > 1 else "C:/Projects/brotherhood-land-finder/data/counties.json"
+if len(sys.argv) < 2:
+    sys.exit("Usage: python scripts/build_counties.py <path to the Land Finder's data/counties.json>")
+src = sys.argv[1]
 d = json.load(open(src, encoding="utf-8"))
 f = {k: i for i, k in enumerate(d["fields"])}
 out = {}
