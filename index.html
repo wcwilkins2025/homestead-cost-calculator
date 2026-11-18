@@ -404,10 +404,16 @@
       <div class="card plans" id="plansCard">
         <h3>Your saved plans</h3>
         <div id="plansOut">
-          <p>Sign in to keep several sets of numbers and open them on any device. It is the same account as Groundwork. There is no password: you get a sign-in link by email.</p>
+          <p id="signSub">Sign in to keep several sets of numbers and open them on any device. No password: enter your email and we send you a 6-digit code. New here? The same code makes your account.</p>
           <form id="signInForm">
-            <div class="field"><label for="signEmail">Email</label><input id="signEmail" type="email" autocomplete="email" required maxlength="200"></div>
-            <button type="submit" class="btn">Email me a sign-in link</button>
+            <div class="field"><label for="signEmail">Email</label><input id="signEmail" type="email" autocomplete="email" inputmode="email" required maxlength="200"></div>
+            <button type="submit" class="btn" id="sendCodeBtn">Email me a code</button>
+          </form>
+          <form id="codeForm" autocomplete="off" hidden>
+            <div class="field"><label for="signCode">The 6-digit code from the email</label><input id="signCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="12" required style="font-size:24px;letter-spacing:.2em;font-variant-numeric:tabular-nums"></div>
+            <button type="submit" class="btn" id="codeBtn">Sign in</button>
+            <button type="button" class="btn ghost" id="resendBtn">Send a new code</button>
+            <button type="button" class="btn ghost" id="otherEmailBtn">Use a different email</button>
           </form>
         </div>
         <div id="plansIn" hidden>
@@ -417,9 +423,10 @@
             <button type="button" class="btn" id="savePlanBtn">Save these numbers</button>
           </div>
           <ul class="planlist" id="planList"></ul>
+          <p class="small"><button type="button" class="linkish" id="closeAcctBtn">Close my account and delete all my plans</button></p>
         </div>
         <p class="flash" id="plansFlash" aria-live="polite"></p>
-        <p class="small">Only your email and the plans you save are kept. Delete a plan here anytime. To close the account, use <a href="https://groundworkpath.org/account.html" rel="noopener">Groundwork's account page</a>.</p>
+        <p class="small">Only your email and the plans you save are kept. Delete a plan here anytime, or close the whole account below once you are signed in.</p>
       </div>
 
       <div class="card pay">
@@ -1055,7 +1062,33 @@
   function loadPlans() {
     return store.list().then(function (rows) { plans = rows || []; drawPlans(); }, function (e) { plans = []; drawPlans(); pflash(niceErr(e)); });
   }
+  /* the email waits in this browser for an hour, so switching to the mail app and back keeps the code box up */
+  var PENDING = 'hc-pending-signin';
+  function savePending(email) { try { localStorage.setItem(PENDING, JSON.stringify({ email: email, at: Date.now() })); } catch (e) {} }
+  function readPending() { try { var p = JSON.parse(localStorage.getItem(PENDING)); return p && Date.now() - p.at < 3600e3 ? p.email : null; } catch (e) { return null; } }
+  function clearPending() { try { localStorage.removeItem(PENDING); } catch (e) {} }
+  function showCode(email) {
+    $('signInForm').hidden = true; $('codeForm').hidden = false;
+    $('signSub').textContent = 'Check your email for a 6-digit code from Homestead Cost Calculator, sent to ' + email + ', and type it below. Check the junk folder if it is not there in a minute.';
+    $('signCode').value = ''; $('signCode').focus();
+  }
+  function showEmail() {
+    clearPending();
+    $('codeForm').hidden = true; $('signInForm').hidden = false;
+    $('signSub').textContent = 'Sign in to keep several sets of numbers and open them on any device. No password: enter your email and we send you a 6-digit code. New here? The same code makes your account.';
+  }
+  function sendCode(email) {
+    pflash('Sending...');
+    return store.sendCode(email).then(function () {
+      savePending(email); showCode(email); pflash('Sent. Check your email for the 6-digit code.');
+    }, function (e) {
+      if (/security purposes|after \d+ seconds|rate limit/i.test((e && e.message) || '')) {
+        savePending(email); showCode(email); pflash('A code already went out a moment ago. Use the code in that email, or wait a minute and send a new one.');
+      } else pflash(niceErr(e));
+    });
+  }
   function showUser(u) {
+    if (u) clearPending();
     $('plansOut').hidden = !!u; $('plansIn').hidden = !u;
     if (u) { $('whoEmail').textContent = u.email || ''; if (!$('planName').value) $('planName').value = P.suggestName(readForm()); loadPlans(); }
   }
@@ -1077,14 +1110,40 @@
     $('plansOut').textContent = 'Saving plans is not available right now. Use "Copy link to these numbers" to keep them.';
   } else {
     store.onChange(showUser);
-    store.user().then(showUser);
+    store.user().then(function (u) {
+      showUser(u);
+      var waiting = !u && readPending();
+      if (waiting) { $('signEmail').value = waiting; showCode(waiting); }
+    });
     $('signInForm').addEventListener('submit', function (ev) {
       ev.preventDefault();
       var email = $('signEmail').value.trim(); if (!email) return;
-      pflash('Sending...');
-      store.signIn(email, location.origin + location.pathname).then(function () { pflash('Check your email for the sign-in link. It opens this page signed in.'); }, function (e) { pflash(niceErr(e)); });
+      $('sendCodeBtn').disabled = true;
+      sendCode(email).then(function () { $('sendCodeBtn').disabled = false; });
     });
-    $('signOutBtn').addEventListener('click', function () { store.signOut().then(function () { plans = []; pflash('Signed out.'); }); });
+    $('codeForm').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var email = readPending() || $('signEmail').value.trim();
+      var code = $('signCode').value.replace(/\D/g, '');
+      if (code.length < 6) { pflash('Type all 6 digits of the code.'); return; }
+      $('codeBtn').disabled = true; pflash('Checking the code...');
+      store.verifyCode(email, code).then(function () { clearPending(); pflash('Signed in.'); $('codeBtn').disabled = false; }, function () {
+        pflash('That code did not work. Use the code from the newest email. Older codes stop working when a new one is sent, and every code stops after an hour.');
+        $('codeBtn').disabled = false;
+      });
+    });
+    $('resendBtn').addEventListener('click', function () {
+      var email = readPending() || $('signEmail').value.trim();
+      if (!email) { showEmail(); return; }
+      $('resendBtn').disabled = true;
+      sendCode(email).then(function () { $('resendBtn').disabled = false; });
+    });
+    $('otherEmailBtn').addEventListener('click', function () { showEmail(); $('signEmail').value = ''; $('signEmail').focus(); pflash(''); });
+    $('signOutBtn').addEventListener('click', function () { store.signOut().then(function () { plans = []; showEmail(); pflash('Signed out.'); }); });
+    $('closeAcctBtn').addEventListener('click', function () {
+      if (!window.confirm('Close your account and delete every saved plan? This cannot be undone.')) return;
+      store.deleteMe().then(function () { plans = []; showEmail(); pflash('Your account and all your plans are deleted.'); }, function (e) { pflash(niceErr(e)); });
+    });
     $('savePlanBtn').addEventListener('click', function () {
       var name = P.cleanName($('planName').value) || P.suggestName(readForm());
       $('planName').value = name;

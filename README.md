@@ -48,11 +48,11 @@ The page shows what the family needs each year two ways (buy the place above, or
 
 ## Saved plans
 
-Anyone can use the page without an account. Signing in lets a person keep several named sets of inputs and open them on any device. It uses the same account and Supabase project as [Groundwork](https://groundworkpath.org/): sign-in is by an emailed link, with no password.
+Anyone can use the page without an account. Signing in lets a person keep several named sets of inputs and open them on any device. It has its own Supabase project, separate from the other Homestead Ready tools. Sign-in is a 6-digit code sent by email from Homestead Cost Calculator <signin@homesteadready.org> through Resend. There is no password and no link to click.
 
 - Table `public.calc_plans` (see `supabase/calc_plans.sql`): name, inputs, dates, one row per saved plan. Row rules let a signed-in person see and change only their own rows, and people who are not signed in get nothing. Up to 50 plans each.
 - Only the page's own input ids are saved (`plans.js` cleans them on the way in and out).
-- Closing the account on Groundwork's account page deletes the saved plans with it.
+- "Close my account" on the page deletes the account and every saved plan (`delete_me()` in the same SQL file).
 - `config.js` holds the project address and the publishable key, both made to be public. The secret key is never in this repo.
 
 ## Deep link

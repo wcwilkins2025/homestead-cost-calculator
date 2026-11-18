@@ -1,4 +1,4 @@
-/* Saved plans: sign in by email link (shared with Groundwork) and keep several named sets of inputs.
+/* Saved plans: sign in with a 6-digit code from email (no password) and keep several named sets of inputs.
    The pure helpers (cleanName, cleanInputs, suggestName, findByName) are checked by tests/run_tests.js.
    The store needs supabase-js and window.HC_SUPA; without them the page works as before, signed out. */
 (function (root) {
@@ -34,20 +34,30 @@
   function makeStore() {
     if (!root.supabase || !root.HC_SUPA) return null;
     var c = root.supabase.createClient(root.HC_SUPA.url, root.HC_SUPA.key, {
-      /* implicit, not pkce: the sign-in rides in the link, so it works when the email opens in another browser */
-      auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' }
+      /* the email carries only a 6-digit code, no link, so nothing has to open in the right browser */
+      auth: { persistSession: true, detectSessionInUrl: false }
     });
     function must(r) { if (r.error) throw r.error; return r.data; }
     function user() { return c.auth.getSession().then(function (r) { return r.data.session ? r.data.session.user : null; }); }
     return {
       user: user,
       onChange: function (cb) { c.auth.onAuthStateChange(function (_e, s) { cb(s ? s.user : null); }); },
-      signIn: function (email, back) { return c.auth.signInWithOtp({ email: email, options: { emailRedirectTo: back } }).then(must); },
+      sendCode: function (email) { return c.auth.signInWithOtp({ email: String(email).trim() }).then(must); },
+      /* type 'email' covers both a new account and a returning one */
+      verifyCode: function (email, code) {
+        return c.auth.verifyOtp({ email: String(email).trim(), token: String(code).replace(/\D/g, ''), type: 'email' }).then(function (r) {
+          if (r.error) throw r.error;
+          if (!r.data || !r.data.session) throw new Error('no session');
+          return r.data.session.user;
+        });
+      },
       signOut: function () { return c.auth.signOut(); },
       list: function () { return c.from(TABLE).select('id, name, inputs, updated_at').order('updated_at', { ascending: false }).then(must); },
       add: function (name, inputs) { return c.from(TABLE).insert({ name: cleanName(name), inputs: inputs }).select('id').then(must); },
       update: function (id, fields) { return c.from(TABLE).update(fields).eq('id', id).then(must); },
-      remove: function (id) { return c.from(TABLE).delete().eq('id', id).then(must); }
+      remove: function (id) { return c.from(TABLE).delete().eq('id', id).then(must); },
+      /* closes the account; the plans go with it (on delete cascade) */
+      deleteMe: function () { return c.rpc('delete_me').then(must).then(function () { return c.auth.signOut(); }); }
     };
   }
 
