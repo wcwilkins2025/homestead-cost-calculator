@@ -2,7 +2,7 @@
 
 What it costs to leave town and set up a self-sustaining place in the country, and what it costs to keep it running each year. One page, no tracking, every default traced to a public source. Signing in is optional and only needed to save plans.
 
-Live page: https://calculator.homesteadready.org/
+Live page: https://homesteadcalculator.org/
 
 Companion to the [Land Finder](https://thelandfinder.org/), which ranks every US county for a self-sustaining life. Pick a county there, then come here to see what it costs.
 
@@ -48,7 +48,7 @@ The page shows what the family needs each year two ways (buy the place above, or
 
 ## Saved plans
 
-Anyone can use the page without an account. Signing in lets a person keep several named sets of inputs and open them on any device. It has its own Supabase project, separate from the other Homestead Ready tools. Sign-in is a 6-digit code sent by email from Homestead Cost Calculator <signin@homesteadready.org> through Resend. There is no password and no link to click.
+Anyone can use the page without an account. Signing in lets a person keep several named sets of inputs and open them on any device. It has its own Supabase project, separate from the other Homestead Ready tools. Sign-in is a 6-digit code sent by email from Homestead Cost Calculator <signin@homesteadcalculator.org> through Resend. There is no password and no link to click.
 
 - Table `public.calc_plans` (see `supabase/calc_plans.sql`): name, inputs, dates, one row per saved plan. Row rules let a signed-in person see and change only their own rows, and people who are not signed in get nothing. Up to 50 plans each.
 - Only the page's own input ids are saved (`plans.js` cleans them on the way in and out).
@@ -60,7 +60,7 @@ Anyone can use the page without an account. Signing in lets a person keep severa
 Any input can be set from the URL, so another page can send someone straight to their county with the numbers filled in:
 
 ```
-https://calculator.homesteadready.org/?state=TX&county=Fannin&acres=40&price=5200
+https://homesteadcalculator.org/?state=TX&county=Fannin&acres=40&price=5200
 ```
 
 | Parameter | Meaning |
